@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colores extraídos de tu logotipo */
+  --color-lingote-red: #d32f2f;
+  --color-lingote-blue: #002b7f;
+  --color-lingote-gold: #ffc107;
+  --color-lingote-bg: #fdfbf7;
+  --color-lingote-dark: #1a1a1a;
+
+  /* Animaciones personalizadas para una UX fluida */
+  @keyframes shine {
+    from { left: -100%; }
+    to { left: 100%; }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-lingote-bg text-lingote-dark antialiased;
+    font-family: 'Poppins', sans-serif; /* O la que prefieras */
+  }
+}
