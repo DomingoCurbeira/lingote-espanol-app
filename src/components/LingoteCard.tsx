@@ -10,7 +10,7 @@ interface Props {
 }
 
 export const LingoteCard = ({ lingote, onSelect }: Props) => {
-  const { nombre, precioBase, descripcion, imagen, ingredientesBase, alergenos } = lingote;
+  const { nombre, precio, descripcion, imagen, ingredientesBase, alergenos, disponible } = lingote;
 
   // [NUEVO ESTADO]
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -27,9 +27,22 @@ export const LingoteCard = ({ lingote, onSelect }: Props) => {
         >
         {/* SECCIÓN DE IMAGEN: Con degradado para legibilidad */}
         <div 
-            className="relative h-72 overflow-hidden flex items-center justify-center p-6 bg-lingote-bg border-b border-gray-100 cursor-zoom-in"
-            onClick={() => setViewerOpen(true)} // [NUEVO EVENTO]
+            onClick={() => disponible && onSelect(lingote)}
+            // 2. VA AQUÍ: Cambia la apariencia y desactiva eventos de puntero
+            className={`relative group bg-white rounded-[2.5rem] overflow-hidden shadow-xl transition-all ${
+                !disponible 
+                ? 'opacity-60 grayscale pointer-events-none' 
+                : 'cursor-pointer hover:shadow-2xl hover:-translate-y-1'
+            }`}
             >
+            {/* 3. VA AQUÍ: El sello visual de Agotado por encima de todo */}
+            {!disponible && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/20 backdrop-blur-[1px]">
+                <div className="bg-lingote-red text-white font-black text-sm px-6 py-2 rounded-full uppercase italic rotate-[-12deg] shadow-2xl border-2 border-white">
+                    Agotado ❌
+                </div>
+                </div>
+            )}
             {/* Fondo decorativo sutil detrás de la imagen */}
             <div className="absolute inset-10 bg-white/50 blur-2xl rounded-full" />
             
@@ -51,7 +64,7 @@ export const LingoteCard = ({ lingote, onSelect }: Props) => {
             {/* PRECIO FLOTANTE */}
             <div className="absolute top-6 right-6 bg-lingote-blue py-2 px-6 rounded-2xl shadow-xl transform -rotate-2 group-hover:rotate-0 transition-transform z-30">
                 <span className="text-white font-black text-2xl italic tracking-tighter">
-                ₡{precioBase.toLocaleString()}
+                ₡{precio.toLocaleString()}
                 </span>
             </div>
 
@@ -94,7 +107,11 @@ export const LingoteCard = ({ lingote, onSelect }: Props) => {
             {/* BOTÓN DE ACCIÓN: Gradiente Dorado */}
             <button 
             onClick={() => onSelect(lingote)}
-            className="w-full py-5 bg-gradient-to-r from-lingote-gold to-[#ffdb70] text-lingote-dark font-black text-xl rounded-[2rem] shadow-xl hover:shadow-lingote-gold/40 hover:-translate-y-1 active:translate-y-0 transition-all uppercase italic border-b-4 border-black/10 flex items-center justify-center gap-3"
+            className={`w-full py-5 bg-gradient-to-r from-lingote-gold to-[#ffdb70] text-lingote-dark font-black text-xl rounded-[2rem] shadow-xl hover:shadow-lingote-gold/40 hover:-translate-y-1 active:translate-y-0 transition-all uppercase italic border-b-4 border-black/10 flex items-center justify-center gap-3 ${
+                !disponible 
+                ? 'opacity-60 grayscale pointer-events-none' 
+                : 'cursor-pointer hover:shadow-2xl hover:-translate-y-1'
+            }`}
             >
             Personalizar <span className="text-2xl">⚡</span>
             </button>

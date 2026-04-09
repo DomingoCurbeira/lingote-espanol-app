@@ -1,41 +1,49 @@
 import { motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
+import { Plus, XCircle } from 'lucide-react'; // Añadimos XCircle para el estado agotado
 import type { ProductoMenu, Promocion } from '../types/ProductoMenu';
 
 interface Props {
-  item: ProductoMenu | Promocion; // Acepta ambos
+  item: ProductoMenu | Promocion;
   onAdd: (item: ProductoMenu | Promocion) => void;
 }
 
 export const ProductoCard = ({ item, onAdd }: Props) => {
-  const { nombre, precio, desc, imagen, disponible, ahorro, alergenos } = item;
+  // Forzamos que si 'disponible' no viene, sea 'false' por defecto
+  // Esto evita que un error de dedo en el data deje el producto abierto
+  const disponible = item.disponible === true; 
+  
+  const { nombre, desc, imagen, ahorro, alergenos } = item;
+  const precioMostrar = (item as any).precio || 0;
 
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`relative bg-white rounded-[2.5rem] p-4 shadow-xl border-b-4 border-gray-100 flex items-center gap-4 overflow-hidden transition-all ${
-        !disponible ? 'opacity-60 grayscale' : 'hover:shadow-2xl hover:-translate-y-1'
-      }`}
+      style={{ pointerEvents: disponible ? 'auto' : 'none' }}
+      className={`relative bg-white rounded-[2.5rem] p-4 shadow-xl border-b-4 border-gray-100 flex items-center gap-4 overflow-hidden transition-all ${!disponible ? 'opacity-50 grayscale' : ''}`}
     >
-      {/* Sello de Agotado */}
+      {/* Sello de Agotado - Estilo "Sello de Caucho" */}
       {!disponible && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
-          <span className="bg-lingote-red text-white font-black text-[10px] px-4 py-2 rounded-full uppercase italic tracking-tighter shadow-lg">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/40 backdrop-blur-[1px]">
+          <motion.div 
+            initial={{ scale: 1.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="border-4 border-lingote-red text-lingote-red font-black text-sm px-4 py-1 rounded-xl uppercase italic tracking-tighter rotate-[-15deg] shadow-2xl bg-white"
+          >
             Agotado ❌
-          </span>
+          </motion.div>
         </div>
       )}
 
-      {/* Badge de Ahorro (Solo para Combos) */}
+      {/* Badge de Ahorro (Solo para Combos y si está disponible) */}
       {ahorro && disponible && (
         <div className="absolute -right-10 top-5 bg-lingote-gold text-lingote-dark text-[8px] font-black py-1 px-10 rotate-45 shadow-sm uppercase italic z-10">
-          Ahorrá ₡{ahorro}
+          Ahorrá ₡{ahorro.toLocaleString()}
         </div>
       )}
 
       {/* Imagen del Producto */}
-      <div className="w-24 h-24 bg-gray-50 rounded-3xl overflow-hidden flex-shrink-0 border border-gray-100 shadow-inner">
+      <div className={`w-24 h-24 bg-gray-50 rounded-3xl overflow-hidden flex-shrink-0 border border-gray-100 shadow-inner ${!disponible && 'grayscale'}`}>
         <img 
           src={imagen ? `/${imagen}` : "/logo_lingote_oficial_ligero.webp"} 
           alt={nombre} 
@@ -47,15 +55,15 @@ export const ProductoCard = ({ item, onAdd }: Props) => {
       {/* Información */}
       <div className="flex-grow">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="font-black text-sm text-lingote-dark uppercase italic leading-tight max-w-[120px]">
+          <h3 className={`font-black text-sm uppercase italic leading-tight max-w-[120px] ${disponible ? 'text-lingote-dark' : 'text-gray-400'}`}>
             {nombre}
           </h3>
-          <span className="font-black text-sm text-lingote-blue italic">
-            ₡{precio.toLocaleString()}
+          <span className={`font-black text-sm italic ${disponible ? 'text-lingote-blue' : 'text-gray-400'}`}>
+            ₡{precioMostrar.toLocaleString()}
           </span>
         </div>
         
-        <p className="text-[10px] text-gray-400 font-bold uppercase italic leading-tight mb-2">
+        <p className="text-[10px] text-gray-400 font-bold uppercase italic leading-tight mb-2 line-clamp-2">
           {desc}
         </p>
 
@@ -71,17 +79,21 @@ export const ProductoCard = ({ item, onAdd }: Props) => {
         )}
       </div>
 
-      {/* Botón de Añadir */}
+      {/* Botón de Añadir / Agotado */}
       <button 
-        onClick={() => disponible && onAdd(item)}
+        type="button"
         disabled={!disponible}
-        className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all active:scale-90 ${
+        onClick={(e) => {
+          e.stopPropagation();
+          if (disponible) onAdd(item);
+        }}
+        className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all ${
           disponible 
-          ? 'bg-lingote-blue text-white hover:bg-lingote-blue/90' 
-          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          ? 'bg-lingote-blue text-white active:scale-90' 
+          : 'bg-gray-200 text-gray-400 opacity-50'
         }`}
       >
-        <Plus size={24} strokeWidth={3} />
+        {disponible ? <Plus size={24} strokeWidth={3} /> : <XCircle size={20} />}
       </button>
     </motion.div>
   );

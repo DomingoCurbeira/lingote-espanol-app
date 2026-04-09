@@ -24,12 +24,12 @@ export interface Extra {
 export interface Lingote {
   id: number;
   nombre: string;
-  precioBase: number;
+  precio: number; // Asegúrate que sea precio y no precioBase
   descripcion: string;
   imagen: string;
-  ingredientesBase: string[]; // Lo que siempre trae
+  ingredientesBase: string[];
   alergenos: string[];
-   disponible?: boolean;
+  disponible: boolean; // <--- ESTA LÍNEA ES VITAL
 }
 
 export interface ItemCarrito {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Header } from './components/Header';
 import { ModalUsuario } from './components/ModalUsuario';
@@ -77,6 +77,33 @@ function App() {
     setMostrarMenu(false); // Vuelve a la landing page
     setPedidoFinalizado(null); // Quita el tiquete si estaba visible
     window.scrollTo({ top: 0, behavior: 'smooth' }); // Sube al inicio suavemente
+  };
+
+  // 1. Tipamos el estado para que acepte el evento (any es el camino rápido, pero efectivo aquí)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e); // Ahora sí guardamos el evento sin quejas
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+
+    // Limpiamos el evento al cerrar para que no gaste memoria
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
+
+  const instalarApp = () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult: any) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('✅ Cliente instaló la App');
+      }
+      setDeferredPrompt(null);
+    });
   };
 
   return (
@@ -238,6 +265,15 @@ function App() {
           </p>
         </div>
       </footer>
+
+      {deferredPrompt && (
+        <button 
+          onClick={instalarApp}
+          className="fixed bottom-24 right-6 z-50 bg-lingote-gold text-lingote-dark font-black px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce uppercase italic text-sm"
+        >
+          📲 Instalar App
+        </button>
+      )}
     </div>
   );
 }

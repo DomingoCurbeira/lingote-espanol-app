@@ -19,7 +19,7 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
     extrasSeleccionados.reduce((sum, e) => sum + e.precio, 0),
   [extrasSeleccionados]);
 
-  const precioUnitarioFinal = lingote.precioBase + precioExtrasTotal;
+  const precioUnitarioFinal = lingote.precio + precioExtrasTotal;
   const precioPedidoTotal = precioUnitarioFinal * cantidad;
 
   const toggleExtra = (extra: Extra) => {
@@ -108,34 +108,59 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
                 </div>
                 <div className="space-y-3">
                    {EXTRAS_DISPONIBLES.map(extra => {
-                      const isSelected = extrasSeleccionados.some(e => e.id === extra.id);
-                      return (
-                         <button 
-                            key={extra.id}
-                            onClick={() => toggleExtra(extra)}
-                            className={`w-full p-5 rounded-2xl border-2 flex items-center gap-4 transition-all text-left ${
-                               isSelected 
-                               ? 'bg-white border-lingote-gold shadow-lg shadow-lingote-gold/10' 
-                               : 'bg-gray-50 border-gray-100 hover:border-gray-200'
-                            }`}
-                         >
-                            <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? 'bg-lingote-gold border-lingote-gold text-lingote-dark' : 'border-gray-300 bg-white text-white'}`}>
-                               ✓
-                            </div>
-                            <div className="flex-grow">
-                               <p className={`font-black uppercase italic tracking-tighter text-sm ${isSelected ? 'text-lingote-dark' : 'text-gray-600'}`}>
-                                  {extra.nombre}
-                               </p>
-                               <p className="text-[10px] text-gray-400 font-medium italic mt-0.5">
-                                  {extra.descripcion}
-                               </p>
-                            </div>
-                            <span className={`font-black text-sm shrink-0 ${isSelected ? 'text-lingote-gold' : 'text-gray-400'}`}>
-                               +₡{extra.precio.toLocaleString()}
-                            </span>
-                         </button>
-                      );
-                   })}
+                     const isSelected = extrasSeleccionados.some(e => e.id === extra.id);
+                     const estaDisponible = extra.disponible !== false; // Seguridad: si no existe el campo, asumimos true
+
+                     return (
+                        <button 
+                           key={extra.id}
+                           // Bloqueamos la función si no está disponible
+                           onClick={() => estaDisponible && toggleExtra(extra)}
+                           // Deshabilitamos el botón nativamente
+                           disabled={!estaDisponible}
+                           className={`w-full p-5 rounded-2xl border-2 flex items-center gap-4 transition-all text-left ${
+                           !estaDisponible 
+                              ? 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed grayscale' 
+                              : isSelected 
+                                 ? 'bg-white border-lingote-gold shadow-lg shadow-lingote-gold/10' 
+                                 : 'bg-gray-50 border-gray-100 hover:border-gray-200'
+                           }`}
+                        >
+                           {/* Checkbox visual - Si no hay, mostramos una X o nada */}
+                           <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-colors ${
+                           !estaDisponible 
+                              ? 'bg-gray-200 border-gray-300 text-gray-400' 
+                              : isSelected 
+                                 ? 'bg-lingote-gold border-lingote-gold text-lingote-dark' 
+                                 : 'border-gray-300 bg-white text-white'
+                           }`}>
+                           {estaDisponible ? '✓' : '✕'}
+                           </div>
+
+                           <div className="flex-grow">
+                           <p className={`font-black uppercase italic tracking-tighter text-sm ${
+                              !estaDisponible 
+                                 ? 'text-gray-400' 
+                                 : isSelected ? 'text-lingote-dark' : 'text-gray-600'
+                           }`}>
+                              {extra.nombre} 
+                              {!estaDisponible && <span className="ml-2 text-[8px] bg-gray-200 px-2 py-0.5 rounded text-gray-500 italic">Agotado</span>}
+                           </p>
+                           <p className="text-[10px] text-gray-400 font-medium italic mt-0.5">
+                              {estaDisponible ? extra.descripcion : "No disponible por el momento"}
+                           </p>
+                           </div>
+
+                           <span className={`font-black text-sm shrink-0 ${
+                           !estaDisponible 
+                              ? 'text-gray-300' 
+                              : isSelected ? 'text-lingote-gold' : 'text-gray-400'
+                           }`}>
+                           +₡{extra.precio.toLocaleString()}
+                           </span>
+                        </button>
+                     );
+                     })}
                 </div>
               </section>
 
