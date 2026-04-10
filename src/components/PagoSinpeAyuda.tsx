@@ -41,7 +41,7 @@ const abrirBanco = (url: string) => {
     { 
       nombre: 'BN', 
       logo: '/Banco_Nacional_de_Costa_Rica.png',
-      protocolo: 'https://auth.bncr.fi.cr/',
+      protocolo: 'https://auth.bncr.fi.cr/adfs/ls?version=1.0&action=signin&realm=urn%3AAppProxy%3Acom&appRealm=37d0e840-bdc3-e911-90f3-005056b6cfbb&returnUrl=https%3A%2F%2Fbncr.bnonline.fi.cr%2FBNCR.InternetBanking.Web&client-request-id=8EE4B71C-A9BF-0002-D6EF-D691BFA9DB01',
       bg: 'bg-white'
     },
     { 
