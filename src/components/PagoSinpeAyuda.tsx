@@ -10,7 +10,7 @@ export const PagoSinpeAyuda = ({ montoTotal, onBancoClick }: Props) => {
   const [copiadoNum, setCopiadoNum] = useState(false);
   const [copiadoMonto, setCopiadoMonto] = useState(false);
   
-  const numeroSinpe = "8888-8888"; // <-- Chef, recordá poner aquí tu número real
+  const numeroSinpe = "60437179"; // <-- Chef, recordá poner aquí tu número real
 
   const copiarDato = (texto: string, setStatus: (v: boolean) => void) => {
     const limpio = texto.replace(/[-₡.]/g, '');
@@ -19,30 +19,35 @@ export const PagoSinpeAyuda = ({ montoTotal, onBancoClick }: Props) => {
     setTimeout(() => setStatus(false), 2000);
   };
 
-  // 2. Modificamos para que intente abrir el banco y prepare el foco
-  const manejarClickBanco = (protocolo: string) => {
-    window.location.href = protocolo;
-    onBancoClick(); 
-  };
+const abrirBanco = (url: string) => {
+  // Abrimos la sucursal en una pestaña nueva
+  window.open(url, '_blank');
+  
+  // Ejecutamos el enfoque para que cuando el cliente regrese 
+  // (cerrando la pestaña o volviendo a la app), el teclado lo espere
+  setTimeout(() => {
+    onBancoClick();
+  }, 500);
+};
 
   const bancos = [
     { 
       nombre: 'BAC', 
       logo: '/BAC_Credomatic.svg', // Quitamos "public/" de la ruta
       // protocolo: 'com.ionicframework.bacapp274812://',
-      protocolo: 'baccredomatic://',
+      protocolo: 'https://www1.sucursalelectronica.com/',
       bg: 'bg-white' 
     },
     { 
       nombre: 'BN', 
       logo: '/Banco_Nacional_de_Costa_Rica.png',
-      protocolo: 'cr.fi.bncr.bnmovil://',
+      protocolo: 'https://auth.bncr.fi.cr/',
       bg: 'bg-white'
     },
     { 
       nombre: 'BCR', 
       logo: '/banco-de-costa-rica.png',
-      protocolo: 'cr.fi.bancobcr.mobile://',
+      protocolo: 'https://www.personas.bancobcr.com/',
       bg: 'bg-white'
     }
   ];
@@ -90,8 +95,9 @@ export const PagoSinpeAyuda = ({ montoTotal, onBancoClick }: Props) => {
           {bancos.map((banco) => (
             <button
               key={banco.nombre}
-              onClick={() => manejarClickBanco(banco.protocolo)} // 3. Usamos la nueva función
+              onClick={() => abrirBanco(banco.protocolo)} // 3. Usamos la nueva función
               className="flex flex-col items-center gap-1 active:scale-90 transition-all group"
+              
             >
               <div className={`${banco.bg} w-14 h-14 rounded-2xl flex items-center justify-center p-2 shadow-sm border border-gray-100 group-hover:shadow-md group-hover:border-lingote-gold/50`}>
                 <img 
