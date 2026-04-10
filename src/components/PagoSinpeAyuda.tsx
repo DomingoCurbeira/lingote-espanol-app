@@ -29,19 +29,20 @@ export const PagoSinpeAyuda = ({ montoTotal, onBancoClick }: Props) => {
     { 
       nombre: 'BAC', 
       logo: '/BAC_Credomatic.svg', // Quitamos "public/" de la ruta
-      protocolo: 'com.ionicframework.bacapp274812://',
+      // protocolo: 'com.ionicframework.bacapp274812://',
+      protocolo: 'baccredomatic://',
       bg: 'bg-white' 
     },
     { 
       nombre: 'BN', 
       logo: '/Banco_Nacional_de_Costa_Rica.png',
-      protocolo: 'bnmovil://',
+      protocolo: 'cr.fi.bncr.bnmovil://',
       bg: 'bg-white'
     },
     { 
       nombre: 'BCR', 
       logo: '/banco-de-costa-rica.png',
-      protocolo: 'bcr.movil://',
+      protocolo: 'cr.fi.bancobcr.mobile://',
       bg: 'bg-white'
     }
   ];
