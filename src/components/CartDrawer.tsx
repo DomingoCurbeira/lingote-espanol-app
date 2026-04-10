@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useRef } from 'react'; // 1. Añadimos useRef
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Plus, Minus, ShoppingBag, CreditCard, Banknote } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
@@ -6,39 +7,43 @@ import { useUserStore } from '../store/useUserStore';
 import { generarMensajeWhatsApp } from '../utils/whatsapp';
 import type { MetodoPago, DatosPago, ItemCarrito } from '../types';
 import { mostrarAlertaPago } from '../utils/alerts';
+import { PagoSinpeAyuda } from './PagoSinpeAyuda';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onFinalizado: (id: string, pago: DatosPago, total: number, items: ItemCarrito[]) => void; // Añadir esto
+  onFinalizado: (id: string, pago: DatosPago, total: number, items: ItemCarrito[]) => void;
 }
 
 export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
   const { carrito, removeItem, updateCantidad, getTotal } = useCartStore();
   const usuario = useUserStore((state) => state.usuario);
 
-  // Estados para el flujo de pago
   const [metodoPago, setMetodoPago] = useState<MetodoPago | null>(null);
   const [comprobante, setComprobante] = useState('');
 
+  // 2. Referencia para el input de comprobante
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // 3. Función para dar foco al input automáticamente
+  const enfocarComprobante = () => {
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 600); // Un pequeño delay para esperar que el usuario regrese de la app bancaria
+  };
+
   const handleFinalizarPedido = async () => {
-  // Verificación de seguridad
-  if (!metodoPago || !usuario) return;
+    if (!metodoPago || !usuario) return;
 
-  const pedidoID = Math.random().toString(36).substring(2, 6).toUpperCase();
-  
-  await mostrarAlertaPago(metodoPago, usuario.nombre);
-  
-  // Guardamos el objeto de pago para reusarlo
-  const datosPago = { metodo: metodoPago, comprobante: comprobante || undefined };
+    const pedidoID = Math.random().toString(36).substring(2, 6).toUpperCase();
+    await mostrarAlertaPago(metodoPago, usuario.nombre);
+    
+    const datosPago = { metodo: metodoPago, comprobante: comprobante || undefined };
+    const url = generarMensajeWhatsApp(carrito, usuario, getTotal(), datosPago, pedidoID);
+    window.open(url, '_blank');
 
-  // Abrir WhatsApp
-  const url = generarMensajeWhatsApp(carrito, usuario, getTotal(), datosPago, pedidoID);
-  window.open(url, '_blank');
-
-  // Notificar a App.tsx - Ahora onFinalizado ya será reconocido
-  onFinalizado(pedidoID, datosPago, getTotal(), [...carrito]);
-};
+    onFinalizado(pedidoID, datosPago, getTotal(), [...carrito]);
+  };
 
   return (
     <AnimatePresence>
@@ -115,7 +120,7 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
 
             {/* Footer con Lógica de Pago */}
             {carrito.length > 0 && (
-              <div className="p-6 bg-gray-50 border-t border-gray-100 shrink-0 space-y-4">
+              <div className="p-6 bg-gray-50 border-t border-gray-100 shrink-0 space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar">
                 
                 {/* Selector de Método de Pago */}
                 <div className="space-y-2">
@@ -138,24 +143,37 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
                   </div>
                 </div>
 
-                {/* Input Comprobante SINPE */}
+                {/* Sección de Ayuda SINPE e Input */}
                 <AnimatePresence>
                   {metodoPago === 'sinpe' && (
                     <motion.div 
                       initial={{ opacity: 0, height: 0 }} 
                       animate={{ opacity: 1, height: 'auto' }} 
                       exit={{ opacity: 0, height: 0 }}
-                      className="bg-white p-4 rounded-2xl border border-blue-100 shadow-inner"
+                      className="space-y-4"
                     >
-                      <p className="text-[10px] font-bold text-lingote-blue mb-2 italic">Últimos 4 dígitos del comprobante:</p>
-                      <input 
-                        type="text" 
-                        maxLength={4}
-                        placeholder="0000"
-                        value={comprobante}
-                        onChange={(e) => setComprobante(e.target.value.replace(/\D/g, ''))}
-                        className="w-full p-2 bg-gray-50 rounded-lg border-2 border-gray-100 outline-none focus:border-lingote-blue text-center font-black tracking-[0.5em] text-lg"
+                      {/* ASISTENTE DE COPIADO - Le pasamos la función de enfoque */}
+                      <PagoSinpeAyuda 
+                        montoTotal={getTotal()} 
+                        onBancoClick={enfocarComprobante} 
                       />
+
+                      {/* INPUT COMPROBANTE */}
+                      <div className="bg-white p-4 rounded-2xl border border-blue-100 shadow-inner">
+                        <p className="text-[10px] font-bold text-lingote-blue mb-2 italic text-center">
+                          Digitá los últimos 4 dígitos del comprobante:
+                        </p>
+                        <input 
+                          ref={inputRef} // 4. Vinculamos la referencia
+                          type="text" 
+                          inputMode="numeric" // 5. Forzamos teclado numérico
+                          maxLength={4}
+                          placeholder="0000"
+                          value={comprobante}
+                          onChange={(e) => setComprobante(e.target.value.replace(/\D/g, ''))}
+                          className="w-full p-2 bg-gray-50 rounded-lg border-2 border-gray-100 outline-none focus:border-lingote-blue text-center font-black tracking-[0.5em] text-lg text-lingote-dark"
+                        />
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>

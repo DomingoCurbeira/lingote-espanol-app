@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(), // <-- Mantenemos Tailwind para que el diseño se vea perfecto
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'logo192.png', 'logo512.png'],
+      includeAssets: ['favicon.png', 'lingote-192.png', 'lingote-512.png'],
       manifest: {
         name: 'El Lingote Español - Cartago',
         short_name: 'Lingote',
@@ -20,12 +20,12 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'logo192.png',
+            src: 'lingote-192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'logo512.png',
+            src: 'lingote-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
