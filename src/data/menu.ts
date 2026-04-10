@@ -46,16 +46,6 @@ export const MENU_LINGOTES: Lingote[] = [
     alergenos: ["🥚"],
     disponible: true
   },
-  // {
-  //   id: 4,
-  //   nombre: "Lingote Gallego",
-  //   precio: 2700,
-  //   descripcion: "Un viaje directo al norte de España con alma tropical. El crujiente y potente chicharrón gallego se fusiona con la intensidad picante de nuestra salsa caribeña.",
-  //   imagen: "gallego.webp",
-  //   ingredientesBase: ["Tortilla de Patatas", "Chicharrón Gallego", "Salsa Caribeña", "Pan"],
-  //   alergenos: ["🥚"],
-  //   disponible: true
-  // },
   {
     id: 5,
     nombre: "Lingote Supremo",
@@ -66,4 +56,14 @@ export const MENU_LINGOTES: Lingote[] = [
     alergenos: ["🥚"],
     disponible: true
   }
+  // {
+  //   id: 4,
+  //   nombre: "Lingote Gallego",
+  //   precio: 2700,
+  //   descripcion: "Un viaje directo al norte de España con alma tropical. El crujiente y potente chicharrón gallego se fusiona con la intensidad picante de nuestra salsa caribeña.",
+  //   imagen: "gallego.webp",
+  //   ingredientesBase: ["Tortilla de Patatas", "Chicharrón Gallego", "Salsa Caribeña", "Pan"],
+  //   alergenos: ["🥚"],
+  //   disponible: true
+  // },
 ];
