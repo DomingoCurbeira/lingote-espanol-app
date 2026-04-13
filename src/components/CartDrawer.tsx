@@ -1,13 +1,14 @@
 
 import { useState, useRef } from 'react'; // 1. Añadimos useRef
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Plus, Minus, ShoppingBag, CreditCard, Banknote } from 'lucide-react';
+import { X, Trash2, Plus, Minus, ShoppingBag, CreditCard, Banknote, Clock } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
 import { useUserStore } from '../store/useUserStore';
 import { generarMensajeWhatsApp } from '../utils/whatsapp';
 import type { MetodoPago, DatosPago, ItemCarrito } from '../types';
 import { mostrarAlertaPago } from '../utils/alerts';
 import { PagoSinpeAyuda } from './PagoSinpeAyuda';
+import { estaAbierto } from '../config/horarios';
 
 interface Props {
   isOpen: boolean;
@@ -24,6 +25,15 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
 
   // 2. Referencia para el input de comprobante
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const abierto = estaAbierto();
+
+  const ahora = new Date();
+  const minutosActuales = ahora.getMinutes();
+  const horaActual = ahora.getHours();
+
+ // Detectamos si estamos entre las 3:30 PM y las 3:45 PM
+ const esCierreInminente = abierto && horaActual === 17 && minutosActuales >= 30 && minutosActuales < 45;
 
   // 3. Función para dar foco al input automáticamente
   const enfocarComprobante = () => {
@@ -186,16 +196,52 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
                     </span>
                   </div>
                   
+                  {/* MENSAJE DE COCINA CERRADA (Solo si no está abierto) */}
+                  {!abierto && (
+                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-4 flex items-center gap-3">
+                      <div className="bg-orange-500 text-white p-1 rounded-lg">
+                        <X size={16} strokeWidth={3} />
+                      </div>
+                      <p className="text-[11px] font-bold text-orange-800 leading-tight">
+                        COCINA CERRADA POR HOY. <br/>
+                        <span className="font-normal opacity-80 italic">Abrimos de Lunes a Sábado de 10:00 AM a 4:00 PM.</span>
+                      </p>
+                    </div>
+                  )}
+
+                  {esCierreInminente && (
+                    <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-3 mb-4 flex items-center gap-3 animate-pulse">
+                      <div className="bg-yellow-500 text-white p-1 rounded-full">
+                        <Clock size={16} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[11px] font-black text-yellow-900 leading-tight uppercase">
+                          ¡Última llamada de cocina! ⏳
+                        </p>
+                        <p className="text-[10px] text-yellow-800 font-bold italic">
+                          Aceptamos pedidos hasta las 3:45 PM para que te dé tiempo de recoger. ¡Apurate!
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <button 
-                    disabled={!metodoPago || (metodoPago === 'sinpe' && comprobante.length < 4)}
+                    // Ahora el botón se bloquea si está CERRADO O si le faltan datos de pago
+                    disabled={!abierto || !metodoPago || (metodoPago === 'sinpe' && comprobante.length < 4)}
                     onClick={handleFinalizarPedido}
-                    className="w-full py-5 bg-lingote-blue disabled:bg-gray-200 text-white font-black text-xl rounded-2xl shadow-xl transition-all uppercase italic flex items-center justify-center gap-3 active:scale-95"
+                    className={`w-full py-5 font-black text-xl rounded-2xl shadow-xl transition-all uppercase italic flex items-center justify-center gap-3 active:scale-95 ${
+                      abierto 
+                        ? 'bg-lingote-blue text-white disabled:bg-gray-200' 
+                        : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    }`}
                   >
-                    {!metodoPago 
-                      ? 'Elegí cómo pagar' 
-                      : (metodoPago === 'sinpe' && comprobante.length < 4) 
-                        ? 'Faltan los 4 dígitos' 
-                        : 'Confirmar Pedido ⚡'
+                    {!abierto 
+                      ? 'Cerrado por hoy' 
+                      : !metodoPago 
+                        ? 'Elegí cómo pagar' 
+                        : (metodoPago === 'sinpe' && comprobante.length < 4) 
+                          ? 'Faltan los 4 dígitos' 
+                          : 'Confirmar Pedido ⚡'
                     }
                   </button>
                 </div>

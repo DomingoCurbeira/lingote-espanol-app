@@ -5,11 +5,9 @@ export const generarMensajeWhatsApp = (
   usuario: Usuario, 
   total: number, 
   pago: DatosPago,
-  pedidoID: string ) => {
+  pedidoID: string 
+) => {
   const fecha = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  
-  // Generamos un ID corto de 4 dígitos para que cada pedido sea único visualmente
- 
 
   let mensaje = `============================\n`;
   mensaje += `    *ORDEN: #${pedidoID}*\n`;
@@ -39,14 +37,20 @@ export const generarMensajeWhatsApp = (
   mensaje += `----------------------------\n`;
   mensaje += `*TOTAL A PAGAR: ₡${total.toLocaleString()}*\n`;
   mensaje += `----------------------------\n\n`;
+  
+  // Ajuste aquí: Añadimos espacio antes de la nota de cierre
   mensaje += `*¡Gracias Por Preferirnos!*\n`;
   mensaje += `============================\n`;
   mensaje += `      *FIN DE LA ORDEN*\n`;
-  mensaje += `============================`;
+  mensaje += `============================\n\n`; // Doble salto para separar la nota
+  
+  // Nota de horario destacada con un emoji para que no se pierda
+  mensaje += `⚠️ *NOTA IMPORTANTE:*\n`;
+  mensaje += `Recuerde que nuestro local cierra a las 4:00 PM. Por favor, pase por su pedido antes de esa hora. ¡Gracias!`;
 
   const mensajeEncoded = encodeURIComponent(mensaje);
   
-  // Tu número de WhatsApp (puedes ajustarlo después)
+  // Su número de WhatsApp (España por el prefijo 34, o cámbielo a 506 si es de CR)
   const miTelefono = "34639835391"; 
   
   return `https://wa.me/${miTelefono}?text=${mensajeEncoded}`;
