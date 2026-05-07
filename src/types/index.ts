@@ -1,16 +1,14 @@
 export type Categoria = 'promociones' | 'lingotes' | 'combos' | 'bebidas' | 'postres';
 
 export interface ProductoMenu {
-  id: number;           // Identificador único numérico (ej: 1, 2, 30)
-  nombre: string;       // Nombre del producto (ej: "Fresco de Cas")
-  precio: number;       // Precio en Colones (ej: 1400)
-  desc: string;         // Descripción corta o detalles (ej: "100% Natural")
-  imagen: string;       // Nombre del archivo en /public (ej: "cas.webp")
-  disponible: boolean;  // Estado para el sello de "Agotado"
-  
-  // Campos opcionales (Usamos '?' porque no todos los productos los tienen)
-  alergenos?: string[]; // Lista de emojis o nombres (ej: ["🥛", "🥚"])
-  ahorro?: number;      // Monto de descuento, usado principalmente en COMBOS
+  id: number;
+  nombre: string;
+  precio: number;
+  desc: string;
+  imagen: string;
+  disponible: boolean;
+  alergenos?: string[];
+  ahorro?: number;
 }
 
 export interface Extra {
@@ -18,38 +16,48 @@ export interface Extra {
   nombre: string;
   precio: number;
   disponible: boolean;
-  descripcion?: string; // <--- AGREGÁ EL SIGNO DE PREGUNTA '?'
+  descripcion?: string;
+  categoria?: 'base' | 'proteina' | 'vegetal' | 'salsa'; // Para el flujo paso a paso
 }
 
 export interface Lingote {
   id: number;
   nombre: string;
-  precio: number; // Asegúrate que sea precio y no precioBase
+  precio: number;
   descripcion: string;
   imagen: string;
   ingredientesBase: string[];
   alergenos: string[];
-  disponible: boolean; // <--- ESTA LÍNEA ES VITAL
+  disponible: boolean;
+  personalizable: boolean; // Indica si permite abrir el modal de personalización
 }
 
 export interface ItemCarrito {
-  idUnico: string;                   // Generado con crypto.randomUUID() para evitar duplicados
-  producto: Lingote | ProductoMenu;  // Puede ser un lingote o un producto simple
-  extras: Extra[];                   // Lista de extras añadidos (vacía para productos simples)
-  cantidad: number;                  // Cuántas unidades de esta configuración específica
-  precioTotal: number;               // El precio unitario calculado (Base + Extras)
+  idUnico: string;
+  producto: Lingote | ProductoMenu;
+  extras: Extra[];
+  cantidad: number;
+  precioTotal: number;
 }
-
 
 export type MetodoPago = 'sinpe' | 'efectivo';
 
 export interface DatosPago {
   metodo: MetodoPago;
-  comprobante?: string; // Los 4 dígitos para SINPE
+  comprobante?: string;
 }
 
 export interface Usuario {
   nombre: string;
   telefono: string;
-  direccion?: string; // Opcional por si luego implementamos delivery en Desamparados
+  direccion?: string;
+}
+
+// [NUEVO] Tipo para representar un pedido en el historial
+export interface PedidoHistorial {
+  id: string;
+  items: ItemCarrito[];
+  total: number;
+  fecha: string; // ISO String
+  metodoPago: MetodoPago;
 }

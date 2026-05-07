@@ -1,16 +1,38 @@
 import type { Lingote, Extra } from '../types';
 
+/**
+ * EXTRAS PARA EL "ARMÁ TU LINGOTE"
+ * Organizados por categorías para el flujo paso a paso
+ */
+export const CATEGORIAS_PERSONALIZACION = {
+  bases: [
+    { id: 'b-pan', nombre: 'Pan Crujiente', precio: 0, disponible: true },
+    { id: 'b-pinto', nombre: 'Gallo Pinto', precio: 500, disponible: true },
+  ],
+  proteinas: [
+    { id: 'p-cerdo', nombre: 'Cerdo Mechado', precio: 1000, disponible: true },
+    // { id: 'p-chicharron', nombre: 'Chicharrón Español', precio: 1200, disponible: false },
+    // { id: 'p-huevo', nombre: 'Huevo Frito', precio: 500, disponible: true },
+  ],
+  vegetales: [
+    { id: 'v-aguacate', nombre: 'Aguacate', precio: 600, disponible: true },
+    { id: 'v-cebolla', nombre: 'Cebolla Encurtida', precio: 500, disponible: true },
+  ],
+  salsas: [
+    { id: 's-alioli', nombre: 'Salsa Alioli', precio: 0, disponible: true },
+    { id: 's-natilla', nombre: 'Natilla', precio: 500, disponible: true },
+    { id: 's-caribeña', nombre: 'Salsa Caribeña', precio: 500, disponible: true },
+    { id: 's-chipotle', nombre: 'Salsa Chipotle', precio: 500, disponible: true },
+    { id: 's-mostaza', nombre: 'Salsa Mostaza-miel', precio: 500, disponible: true },
+  ]
+};
+
+// Mantenemos esto para compatibilidad si otros componentes lo usan
 export const EXTRAS_DISPONIBLES: Extra[] = [
-  { id: 'ex-aguacate', nombre: 'Aguacate', precio: 600, disponible: true },
-  { id: 'ex-cebolla', nombre: 'Cebolla Encurtida', precio: 500, disponible: true },
-  { id: 'ex-natilla', nombre: 'Natilla', precio: 400, disponible: true },
-  { id: 'ex-caribeña', nombre: 'Salsa Caribeña', precio: 500, disponible: true },
-  { id: 'ex-alioli', nombre: 'Salsa Alioli', precio: 500, disponible: true },
-  { id: 'ex-chipotle', nombre: 'Salsa Chipotle', precio: 500, disponible: true },
-  { id: 'ex-mostaza', nombre: 'Salsa Mostaza-miel', precio: 500, disponible: true },
-  { id: 'ex-pinto', nombre: 'Gallo Pinto', precio: 800, disponible: true },
-  { id: 'ex-cerdo', nombre: 'Cerdo Mechado', precio: 1000, disponible: true },
-  { id: 'ex-roxons', nombre: 'Chicharrón Español', precio: 1200, disponible: false },
+  ...CATEGORIAS_PERSONALIZACION.bases,
+  ...CATEGORIAS_PERSONALIZACION.proteinas,
+  ...CATEGORIAS_PERSONALIZACION.vegetales,
+  ...CATEGORIAS_PERSONALIZACION.salsas,
 ];
 
 export const MENU_LINGOTES: Lingote[] = [
@@ -22,8 +44,8 @@ export const MENU_LINGOTES: Lingote[] = [
     imagen: "clasico.webp",
     ingredientesBase: ["Tortilla de Patatas", "Pan", "Alioli"],
     alergenos: ["🥚", "🌽"],
-    disponible: true
-    
+    disponible: true,
+    personalizable: false // BLOQUEADO
   },
   {
     id: 2,
@@ -33,8 +55,8 @@ export const MENU_LINGOTES: Lingote[] = [
     imagen: "tico.webp",
     ingredientesBase: ["Tortilla de Patatas", "Gallo Pinto", "Natilla"],
     alergenos: ["🥚", "🥛"],
-    disponible: true
-    
+    disponible: true,
+    personalizable: false // BLOQUEADO
   },
   {
     id: 3,
@@ -44,7 +66,8 @@ export const MENU_LINGOTES: Lingote[] = [
     imagen: "patron.webp",
     ingredientesBase: ["Tortilla de Patatas", "Cerdo Mechado", "Aguacate", "Cebolla Encurtida"],
     alergenos: ["🥚"],
-    disponible: true
+    disponible: true,
+    personalizable: false // BLOQUEADO
   },
   {
     id: 5,
@@ -54,16 +77,18 @@ export const MENU_LINGOTES: Lingote[] = [
     imagen: "supremo.webp",
     ingredientesBase: ["Tortilla de Patatas", "Gallo Pinto", "Cerdo Mechado", "Aguacate", "Cebolla Encurtida"],
     alergenos: ["🥚"],
-    disponible: true
+    disponible: true,
+    personalizable: false // BLOQUEADO
+  },
+  {
+    id: 99,
+    nombre: "Diseña tu Lingote",
+    precio: 1500, // Precio base de la Tortilla sola
+    descripcion: "¡Tu eres el chef! Partimos de nuestra base de Tortilla de Patatas y tu elijes los toppings que más te gusten.",
+    imagen: "lingote_tortilla.webp", // Deberás añadir esta imagen o usar un placeholder
+    ingredientesBase: ["Tortilla de Patatas"],
+    alergenos: ["🥚"],
+    disponible: true,
+    personalizable: true // UNICA OPCIÓN PERSONALIZABLE
   }
-  // {
-  //   id: 4,
-  //   nombre: "Lingote Gallego",
-  //   precio: 2700,
-  //   descripcion: "Un viaje directo al norte de España con alma tropical. El crujiente y potente chicharrón gallego se fusiona con la intensidad picante de nuestra salsa caribeña.",
-  //   imagen: "gallego.webp",
-  //   ingredientesBase: ["Tortilla de Patatas", "Chicharrón Gallego", "Salsa Caribeña", "Pan"],
-  //   alergenos: ["🥚"],
-  //   disponible: true
-  // },
 ];

@@ -1,69 +1,70 @@
-import { useUserStore } from '../store/useUserStore';
-import { useCartStore } from '../store/useCartStore'; // [NUEVO]
-import { User, ShoppingBag } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, User } from 'lucide-react';
+import { obtenerEstadoTienda } from '../config/horarios';
 
 interface Props {
   onOpenCart: () => void;
-  onGoHome: () => void; // [NUEVO]
+  onGoHome: () => void;
+  onOpenProfile: () => void;
+  cartCount: number;
 }
 
-export const Header = ({ onOpenCart, onGoHome }: Props) => {
-  const usuario = useUserStore((state) => state.usuario);
-  const carrito = useCartStore((state) => state.carrito);
-  const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
-  const inicial = usuario?.nombre ? usuario.nombre.charAt(0).toUpperCase() : null;
+export const Header = ({ onOpenCart, onGoHome, onOpenProfile, cartCount }: Props) => {
+  const { estaAbierto, esCierreInminente, horaLimitePedidos } = obtenerEstadoTienda();
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <header className="sticky top-0 z-[100] w-full bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <div className="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
         
-        {/* LOGO (Ahora es un botón de inicio) */}
+        {/* Lado Izquierdo: Estado de la Tienda */}
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full animate-pulse ${estaAbierto ? (esCierreInminente ? 'bg-yellow-500' : 'bg-green-500') : 'bg-red-500'}`} />
+            <span className={`text-[10px] font-black uppercase italic tracking-widest ${estaAbierto ? (esCierreInminente ? 'text-yellow-600' : 'text-green-600') : 'text-red-600'}`}>
+              {estaAbierto ? (esCierreInminente ? 'Última llamada' : 'Abierto') : 'Cerrado'}
+            </span>
+          </div>
+          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">
+            {estaAbierto 
+              ? `Pedidos hasta las ${horaLimitePedidos}` 
+              : 'Abrimos a las 8:00 AM'}
+          </p>
+        </div>
+
+        {/* Centro: Logo/Home */}
         <button 
           onClick={onGoHome}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity active:scale-95"
+          className="absolute left-1/2 -translate-x-1/2 hover:scale-110 transition-transform active:scale-90"
         >
-          <img 
-            src="/logo_lingote_oficial_ligero.webp" 
-            alt="El Lingote Español" 
-            className="h-14 w-auto drop-shadow-sm"
-          />
-          <div className="hidden sm:block text-left">
-            <h1 className="text-xl font-black italic text-lingote-dark leading-none uppercase tracking-tighter">
-              El Lingote <span className="text-lingote-red text-xs block not-italic tracking-widest font-bold">ESPAÑOL</span>
-            </h1>
-          </div>
+          <img src="/logo_lingote_transparente.svg" alt="Logo" className="w-12 h-12 object-contain" />
         </button>
 
-        {/* ACCIONES */}
-        <div className="flex items-center gap-4">
+        {/* Lado Derecho: Acciones */}
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={onOpenProfile}
+            className="p-3 text-lingote-dark hover:bg-gray-100 rounded-2xl transition-all active:scale-90"
+          >
+            <User size={24} strokeWidth={2.5} />
+          </button>
           
-          {/* BOTÓN CARRITO - [ACTUALIZADO] */}
           <button 
             onClick={onOpenCart}
-            className="relative p-2 text-lingote-blue hover:bg-gray-50 rounded-full transition-all active:scale-90"
+            className="relative p-3 bg-lingote-dark text-white rounded-2xl shadow-xl shadow-lingote-dark/20 hover:scale-105 active:scale-95 transition-all"
           >
-            <ShoppingBag size={24} />
-            
-            {/* Solo mostramos el badge si hay productos */}
-            {totalItems > 0 && (
-              <span className="absolute top-0 right-0 bg-lingote-red text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-in zoom-in duration-300">
-                {totalItems}
-              </span>
-            )}
-          </button>
-
-          {/* PERFIL DE USUARIO */}
-          <button className="flex items-center gap-2 p-1 pr-4 bg-gray-50 rounded-full border border-gray-100 hover:border-lingote-gold transition-all">
-            <div className="w-9 h-9 bg-lingote-blue rounded-full flex items-center justify-center text-white shadow-md">
-              {inicial ? (
-                <span className="font-black text-sm">{inicial}</span>
-              ) : (
-                <User size={18} />
+            <ShoppingBag size={24} strokeWidth={2.5} />
+            <AnimatePresence>
+              {cartCount > 0 && (
+                <motion.span 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  className="absolute -top-1 -right-1 bg-lingote-red text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white shadow-lg"
+                >
+                  {cartCount}
+                </motion.span>
               )}
-            </div>
-            <span className="text-xs font-black uppercase text-gray-500 hidden md:block">
-              {usuario ? usuario.nombre.split(' ')[0] : 'Mi Perfil'}
-            </span>
+            </AnimatePresence>
           </button>
         </div>
       </div>

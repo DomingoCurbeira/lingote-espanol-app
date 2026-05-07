@@ -53,7 +53,7 @@ export const TiqueteGourmet = ({ pedido, onNuevoPedido }: Props) => {
             className="w-24 h-24 object-contain mb-2" 
           />
           <h2 className="font-bold text-lg uppercase tracking-tight">El Lingote Español</h2>
-          <p className="text-[10px] uppercase">Desamparados, San José</p>
+          <p className="text-[10px] uppercase">San Rafael de Oreamuno, Cartago</p>
           <div className="w-full border-b border-dashed border-gray-400 my-3" />
           <p className="font-bold text-sm italic">ORDEN: #{pedido.id}</p>
           <div className="w-full border-b border-dashed border-gray-400 mt-3" />
@@ -98,7 +98,7 @@ export const TiqueteGourmet = ({ pedido, onNuevoPedido }: Props) => {
         {/* Dentro de TiqueteGourmet.tsx */}
         <div className="text-center mt-4 border-t border-dashed border-gray-200 pt-4">
         <p className="text-[10px] font-bold uppercase">📍 Dirección:</p>
-        <p className="text-[10px]">200m Este de la Iglesia, Desamparados</p>
+        <p className="text-[10px]">200m Este de la Iglesia, San Rafael de Oreamuno</p>
         <p className="text-[10px] font-bold uppercase mt-2">⏰ Horario:</p>
         <p className="text-[10px]">Lun-Sab: 10:00 PM - 16:00 PM</p>
         </div>

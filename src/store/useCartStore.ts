@@ -9,6 +9,7 @@ interface CartState {
   updateCantidad: (idUnico: string, delta: number) => void;
   vaciarCarrito: () => void;
   getTotal: () => number;
+  itemsCount: () => number;
 }
 
 export const useCartStore = create<CartState>()(
@@ -18,7 +19,6 @@ export const useCartStore = create<CartState>()(
 
       addItem: (item) => {
         set((state) => {
-          // Si es un producto simple (sin extras) y ya está, sumamos cantidad
           const isSimple = item.extras.length === 0;
           const index = state.carrito.findIndex(i => 
             i.producto.id === item.producto.id && i.extras.length === 0
@@ -30,7 +30,6 @@ export const useCartStore = create<CartState>()(
             return { carrito: nuevoCarrito };
           }
 
-          // Si tiene extras o es nuevo, lo añadimos como item único
           return { carrito: [...state.carrito, item] };
         });
       },
@@ -57,7 +56,12 @@ export const useCartStore = create<CartState>()(
         const { carrito } = get();
         return carrito.reduce((acc, item) => acc + (item.precioTotal * item.cantidad), 0);
       },
+
+      itemsCount: () => {
+        const { carrito } = get();
+        return carrito.reduce((acc, item) => acc + item.cantidad, 0);
+      },
     }),
-    { name: 'lingote-cart-storage' } // Persistencia en localStorage
+    { name: 'lingote-cart-storage' }
   )
 );

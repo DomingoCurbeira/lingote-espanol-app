@@ -1,57 +1,61 @@
-
-import { useState, useRef } from 'react'; // 1. Añadimos useRef
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Plus, Minus, ShoppingBag, CreditCard, Banknote, Clock } from 'lucide-react';
+import { X, Trash2, Plus, Minus, ShoppingBag, CreditCard, Banknote, Clock, Lock, UserCheck } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
 import { useUserStore } from '../store/useUserStore';
 import { generarMensajeWhatsApp } from '../utils/whatsapp';
 import type { MetodoPago, DatosPago, ItemCarrito } from '../types';
 import { mostrarAlertaPago } from '../utils/alerts';
 import { PagoSinpeAyuda } from './PagoSinpeAyuda';
-import { estaAbierto } from '../config/horarios';
+import { obtenerEstadoTienda } from '../config/horarios';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onFinalizado: (id: string, pago: DatosPago, total: number, items: ItemCarrito[]) => void;
+  onRequireUser: () => void;
 }
 
-export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
+export const CartDrawer = ({ isOpen, onClose, onFinalizado, onRequireUser }: Props) => {
   const { carrito, removeItem, updateCantidad, getTotal } = useCartStore();
-  const usuario = useUserStore((state) => state.usuario);
+  const { usuario, agregarPedidoAlHistorial } = useUserStore();
 
   const [metodoPago, setMetodoPago] = useState<MetodoPago | null>(null);
   const [comprobante, setComprobante] = useState('');
 
-  // 2. Referencia para el input de comprobante
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const abierto = estaAbierto();
+  const { estaAbierto: abierto, esCierreInminente, horarioTexto, horaLimitePedidos } = obtenerEstadoTienda();
 
-  const ahora = new Date();
-  const minutosActuales = ahora.getMinutes();
-  const horaActual = ahora.getHours();
-
- // Detectamos si estamos entre las 3:30 PM y las 3:45 PM
- const esCierreInminente = abierto && horaActual === 17 && minutosActuales >= 30 && minutosActuales < 45;
-
-  // 3. Función para dar foco al input automáticamente
   const enfocarComprobante = () => {
     setTimeout(() => {
       inputRef.current?.focus();
-    }, 600); // Un pequeño delay para esperar que el usuario regrese de la app bancaria
+    }, 600);
   };
 
   const handleFinalizarPedido = async () => {
-    if (!metodoPago || !usuario) return;
+    if (!usuario) {
+      onRequireUser();
+      return;
+    }
+
+    if (!metodoPago) return;
 
     const pedidoID = Math.random().toString(36).substring(2, 6).toUpperCase();
     await mostrarAlertaPago(metodoPago, usuario.nombre);
     
     const datosPago = { metodo: metodoPago, comprobante: comprobante || undefined };
     const url = generarMensajeWhatsApp(carrito, usuario, getTotal(), datosPago, pedidoID);
-    window.open(url, '_blank');
+    
+    agregarPedidoAlHistorial({
+      id: pedidoID,
+      items: [...carrito],
+      total: getTotal(),
+      fecha: new Date().toISOString(),
+      metodoPago: metodoPago
+    });
 
+    window.open(url, '_blank');
     onFinalizado(pedidoID, datosPago, getTotal(), [...carrito]);
   };
 
@@ -74,7 +78,6 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col"
           >
-            {/* Header */}
             <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
               <div className="flex items-center gap-2">
                 <ShoppingBag className="text-lingote-blue" />
@@ -85,7 +88,6 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
               </button>
             </div>
 
-            {/* Lista de Items */}
             <div className="flex-grow overflow-y-auto p-6 space-y-6">
               {carrito.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-gray-300 italic text-center">
@@ -93,59 +95,70 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
                   <p className="font-bold uppercase tracking-widest text-xs">El carrito está vacío</p>
                 </div>
               ) : (
-                carrito.map((item) => (
-                  <div key={item.idUnico} className="flex gap-4 border-b border-gray-50 pb-6">
-                    <img 
-                      src={`/${item.producto.imagen}`} 
-                      className="w-20 h-20 object-contain bg-gray-50 rounded-2xl border border-gray-100"
-                      alt={item.producto.nombre} 
-                    />
-                    <div className="flex-grow">
-                      <div className="flex justify-between">
-                        <h4 className="font-black uppercase italic text-sm text-lingote-dark">{item.producto.nombre}</h4>
-                        <button onClick={() => removeItem(item.idUnico)} className="text-gray-300 hover:text-lingote-red transition-colors">
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      {item.extras.length > 0 && (
-                        <p className="text-[10px] text-lingote-blue font-bold italic mt-1">
-                          + {item.extras.map(e => e.nombre).join(', ')}
-                        </p>
-                      )}
-                      <div className="flex justify-between items-center mt-3">
-                        <div className="flex items-center gap-3 bg-gray-100 rounded-xl px-2 py-1">
-                          <button onClick={() => updateCantidad(item.idUnico, -1)} className="p-1 hover:text-lingote-blue"><Minus size={14} /></button>
-                          <span className="font-black text-sm w-4 text-center">{item.cantidad}</span>
-                          <button onClick={() => updateCantidad(item.idUnico, 1)} className="p-1 hover:text-lingote-blue"><Plus size={14} /></button>
+                carrito.map((item) => {
+                  const fallbackImage = '/logo_lingote_oficial_ligero.webp';
+                  return (
+                    <div key={item.idUnico} className="flex gap-4 border-b border-gray-50 pb-6">
+                      <img 
+                        src={item.producto.imagen ? `/${item.producto.imagen}` : fallbackImage} 
+                        className="w-20 h-20 object-contain bg-gray-50 rounded-2xl border border-gray-100"
+                        alt={item.producto.nombre} 
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = fallbackImage;
+                        }}
+                      />
+                      <div className="flex-grow">
+                        <div className="flex justify-between">
+                          <h4 className="font-black uppercase italic text-sm text-lingote-dark">{item.producto.nombre}</h4>
+                          <button onClick={() => removeItem(item.idUnico)} className="text-gray-300 hover:text-lingote-red transition-colors">
+                            <Trash2 size={16} />
+                          </button>
                         </div>
-                        <span className="font-black text-lingote-dark italic text-sm tabular-nums">
-                          ₡{(item.precioTotal * item.cantidad).toLocaleString()}
-                        </span>
+                        {item.extras.length > 0 && (
+                          <p className="text-[10px] text-lingote-blue font-bold italic mt-1">
+                            + {item.extras.map(e => e.nombre).join(', ')}
+                          </p>
+                        )}
+                        <div className="flex justify-between items-center mt-3">
+                          <div className="flex items-center gap-3 bg-gray-100 rounded-xl px-2 py-1">
+                            <button onClick={() => updateCantidad(item.idUnico, -1)} className="p-1 hover:text-lingote-blue"><Minus size={14} /></button>
+                            <span className="font-black text-sm w-4 text-center">{item.cantidad}</span>
+                            <button onClick={() => updateCantidad(item.idUnico, 1)} className="p-1 hover:text-lingote-blue"><Plus size={14} /></button>
+                          </div>
+                          <span className="font-black text-lingote-dark italic text-sm tabular-nums">
+                            ₡{(item.precioTotal * item.cantidad).toLocaleString()}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
-            {/* Footer con Lógica de Pago */}
             {carrito.length > 0 && (
               <div className="p-6 bg-gray-50 border-t border-gray-100 shrink-0 space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar">
                 
-                {/* Selector de Método de Pago */}
-                <div className="space-y-2">
-                  <p className="text-[10px] font-black uppercase text-gray-400 italic">¿Cómo vas a pagar?</p>
+                <div className={`space-y-2 transition-opacity ${!abierto ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+                  <div className="flex justify-between items-end">
+                    <p className="text-[10px] font-black uppercase text-gray-400 italic">¿Cómo vas a pagar?</p>
+                    {!abierto && (
+                      <span className="flex items-center gap-1 text-red-500 font-black text-[9px] uppercase italic">
+                        <Lock size={10} /> Pagos bloqueados
+                      </span>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     <button 
                       onClick={() => setMetodoPago('sinpe')}
-                      className={`p-3 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${metodoPago === 'sinpe' ? 'border-lingote-blue bg-white shadow-md' : 'border-gray-200 bg-gray-50 opacity-60'}`}
+                      className={`p-3 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${metodoPago === 'sinpe' ? 'border-lingote-blue bg-white shadow-md' : 'border-gray-200 bg-gray-50'}`}
                     >
                       <CreditCard size={18} className={metodoPago === 'sinpe' ? 'text-lingote-blue' : ''} />
                       <span className="text-[10px] font-black uppercase">SINPE Móvil</span>
                     </button>
                     <button 
                       onClick={() => setMetodoPago('efectivo')}
-                      className={`p-3 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${metodoPago === 'efectivo' ? 'border-lingote-blue bg-white shadow-md' : 'border-gray-200 bg-gray-50 opacity-60'}`}
+                      className={`p-3 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${metodoPago === 'efectivo' ? 'border-lingote-blue bg-white shadow-md' : 'border-gray-200 bg-gray-50'}`}
                     >
                       <Banknote size={18} className={metodoPago === 'efectivo' ? 'text-lingote-blue' : ''} />
                       <span className="text-[10px] font-black uppercase">Efectivo</span>
@@ -153,7 +166,6 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
                   </div>
                 </div>
 
-                {/* Sección de Ayuda SINPE e Input */}
                 <AnimatePresence>
                   {metodoPago === 'sinpe' && (
                     <motion.div 
@@ -162,21 +174,19 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
                       exit={{ opacity: 0, height: 0 }}
                       className="space-y-4"
                     >
-                      {/* ASISTENTE DE COPIADO - Le pasamos la función de enfoque */}
                       <PagoSinpeAyuda 
                         montoTotal={getTotal()} 
                         onBancoClick={enfocarComprobante} 
                       />
 
-                      {/* INPUT COMPROBANTE */}
                       <div className="bg-white p-4 rounded-2xl border border-blue-100 shadow-inner">
                         <p className="text-[10px] font-bold text-lingote-blue mb-2 italic text-center">
                           Digitá los últimos 4 dígitos del comprobante:
                         </p>
                         <input 
-                          ref={inputRef} // 4. Vinculamos la referencia
+                          ref={inputRef}
                           type="text" 
-                          inputMode="numeric" // 5. Forzamos teclado numérico
+                          inputMode="numeric"
                           maxLength={4}
                           placeholder="0000"
                           value={comprobante}
@@ -196,16 +206,20 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
                     </span>
                   </div>
                   
-                  {/* MENSAJE DE COCINA CERRADA (Solo si no está abierto) */}
                   {!abierto && (
-                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-4 flex items-center gap-3">
-                      <div className="bg-orange-500 text-white p-1 rounded-lg">
-                        <X size={16} strokeWidth={3} />
+                    <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4 mb-4 flex items-start gap-3">
+                      <div className="bg-orange-500 text-white p-1 rounded-lg shrink-0 mt-0.5">
+                        <Clock size={16} strokeWidth={3} />
                       </div>
-                      <p className="text-[11px] font-bold text-orange-800 leading-tight">
-                        COCINA CERRADA POR HOY. <br/>
-                        <span className="font-normal opacity-80 italic">Abrimos de Lunes a Sábado de 10:00 AM a 4:00 PM.</span>
-                      </p>
+                      <div className="flex-1">
+                        <p className="text-[11px] font-black text-orange-900 leading-tight uppercase">
+                          PEDIDOS NO DISPONIBLES 🚫
+                        </p>
+                        <p className="text-[10px] text-orange-800 font-bold italic mt-1">
+                          Nuestro horario es de {horarioTexto}. <br/>
+                          Por seguridad, los pagos se bloquean a las {horaLimitePedidos}.
+                        </p>
+                      </div>
                     </div>
                   )}
 
@@ -219,15 +233,14 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
                           ¡Última llamada de cocina! ⏳
                         </p>
                         <p className="text-[10px] text-yellow-800 font-bold italic">
-                          Aceptamos pedidos hasta las 3:45 PM para que te dé tiempo de recoger. ¡Apurate!
+                          Aceptamos pedidos hasta las {horaLimitePedidos} para que te dé tiempo de recoger. ¡Apurate!
                         </p>
                       </div>
                     </div>
                   )}
 
                   <button 
-                    // Ahora el botón se bloquea si está CERRADO O si le faltan datos de pago
-                    disabled={!abierto || !metodoPago || (metodoPago === 'sinpe' && comprobante.length < 4)}
+                    disabled={!abierto || (metodoPago === 'sinpe' && comprobante.length < 4)}
                     onClick={handleFinalizarPedido}
                     className={`w-full py-5 font-black text-xl rounded-2xl shadow-xl transition-all uppercase italic flex items-center justify-center gap-3 active:scale-95 ${
                       abierto 
@@ -236,12 +249,14 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado }: Props) => {
                     }`}
                   >
                     {!abierto 
-                      ? 'Cerrado por hoy' 
-                      : !metodoPago 
-                        ? 'Elegí cómo pagar' 
-                        : (metodoPago === 'sinpe' && comprobante.length < 4) 
-                          ? 'Faltan los 4 dígitos' 
-                          : 'Confirmar Pedido ⚡'
+                      ? 'Cocina Cerrada' 
+                      : !usuario 
+                        ? <>Completar mis Datos <UserCheck size={24} /></>
+                        : !metodoPago 
+                          ? 'Elegí cómo pagar' 
+                          : (metodoPago === 'sinpe' && comprobante.length < 4) 
+                            ? 'Faltan los 4 dígitos' 
+                            : 'Confirmar Pedido ⚡'
                     }
                   </button>
                 </div>

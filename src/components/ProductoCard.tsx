@@ -1,100 +1,47 @@
 import { motion } from 'framer-motion';
-import { Plus, XCircle } from 'lucide-react'; // Añadimos XCircle para el estado agotado
-import type { ProductoMenu, Promocion } from '../types/ProductoMenu';
+import { ShoppingBag } from 'lucide-react';
 
-interface Props {
-  item: ProductoMenu | Promocion;
-  onAdd: (item: ProductoMenu | Promocion) => void;
-}
-
-export const ProductoCard = ({ item, onAdd }: Props) => {
-  // Forzamos que si 'disponible' no viene, sea 'false' por defecto
-  // Esto evita que un error de dedo en el data deje el producto abierto
-  const disponible = item.disponible === true; 
-  
-  const { nombre, desc, imagen, ahorro, alergenos } = item;
-  const precioMostrar = (item as any).precio || 0;
+export const ProductoCard = ({ item, onAdd }: { item: any, onAdd: (item: any) => void }) => {
+  const { nombre, precio, desc, imagen, disponible } = item;
+  const fallbackImage = '/logo_lingote_oficial_ligero.webp';
 
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      style={{ pointerEvents: disponible ? 'auto' : 'none' }}
-      className={`relative bg-white rounded-[2.5rem] p-4 shadow-xl border-b-4 border-gray-100 flex items-center gap-4 overflow-hidden transition-all ${!disponible ? 'opacity-50 grayscale' : ''}`}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className={`bg-white rounded-[2.5rem] p-6 shadow-xl border border-gray-100 flex gap-4 items-center group transition-all ${!disponible ? 'opacity-50 grayscale' : 'hover:shadow-2xl hover:-translate-y-1'}`}
     >
-      {/* Sello de Agotado - Estilo "Sello de Caucho" */}
-      {!disponible && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/40 backdrop-blur-[1px]">
-          <motion.div 
-            initial={{ scale: 1.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="border-4 border-lingote-red text-lingote-red font-black text-sm px-4 py-1 rounded-xl uppercase italic tracking-tighter rotate-[-15deg] shadow-2xl bg-white"
-          >
-            Agotado ❌
-          </motion.div>
-        </div>
-      )}
-
-      {/* Badge de Ahorro (Solo para Combos y si está disponible) */}
-      {ahorro && disponible && (
-        <div className="absolute -right-10 top-5 bg-lingote-gold text-lingote-dark text-[8px] font-black py-1 px-10 rotate-45 shadow-sm uppercase italic z-10">
-          Ahorrá ₡{ahorro.toLocaleString()}
-        </div>
-      )}
-
-      {/* Imagen del Producto */}
-      <div className={`w-24 h-24 bg-gray-50 rounded-3xl overflow-hidden flex-shrink-0 border border-gray-100 shadow-inner ${!disponible && 'grayscale'}`}>
+      <div className="w-24 h-24 shrink-0 bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 relative">
         <img 
-          src={imagen ? `/${imagen}` : "/logo_lingote_oficial_ligero.webp"} 
+          src={imagen ? `/${imagen}` : fallbackImage} 
           alt={nombre} 
-          className="w-full h-full object-cover"
-          onError={(e) => {(e.target as HTMLImageElement).src = "/logo_lingote_oficial_ligero.webp"}}
+          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = fallbackImage;
+          }}
         />
-      </div>
-      
-      {/* Información */}
-      <div className="flex-grow">
-        <div className="flex justify-between items-start mb-1">
-          <h3 className={`font-black text-sm uppercase italic leading-tight max-w-[120px] ${disponible ? 'text-lingote-dark' : 'text-gray-400'}`}>
-            {nombre}
-          </h3>
-          <span className={`font-black text-sm italic ${disponible ? 'text-lingote-blue' : 'text-gray-400'}`}>
-            ₡{precioMostrar.toLocaleString()}
-          </span>
-        </div>
-        
-        <p className="text-[10px] text-gray-400 font-bold uppercase italic leading-tight mb-2 line-clamp-2">
-          {desc}
-        </p>
-
-        {/* Alérgenos */}
-        {alergenos && alergenos.length > 0 && (
-          <div className="flex gap-1">
-            {alergenos.map((a, i) => (
-              <span key={i} className="text-xs bg-gray-100 w-6 h-6 flex items-center justify-center rounded-full opacity-70">
-                {a}
-              </span>
-            ))}
+        {!disponible && (
+          <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] flex items-center justify-center">
+            <span className="bg-lingote-red text-white text-[8px] font-black px-2 py-1 rounded-full uppercase italic rotate-[-10deg]">Agotado</span>
           </div>
         )}
       </div>
 
-      {/* Botón de Añadir / Agotado */}
-      <button 
-        type="button"
-        disabled={!disponible}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (disponible) onAdd(item);
-        }}
-        className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all ${
-          disponible 
-          ? 'bg-lingote-blue text-white active:scale-90' 
-          : 'bg-gray-200 text-gray-400 opacity-50'
-        }`}
-      >
-        {disponible ? <Plus size={24} strokeWidth={3} /> : <XCircle size={20} />}
-      </button>
+      <div className="flex-grow">
+        <h4 className="text-lg font-black text-lingote-dark uppercase italic tracking-tighter leading-tight">{nombre}</h4>
+        <p className="text-gray-400 text-[10px] font-medium italic mt-1 leading-tight">{desc}</p>
+        <div className="flex items-center justify-between mt-3">
+          <span className="text-xl font-black text-lingote-blue italic tabular-nums">₡{precio.toLocaleString()}</span>
+          <button 
+            disabled={!disponible}
+            onClick={() => onAdd(item)}
+            className="p-3 bg-lingote-dark text-white rounded-2xl shadow-lg shadow-lingote-dark/20 active:scale-90 transition-all hover:bg-lingote-blue disabled:bg-gray-200"
+          >
+            <ShoppingBag size={18} strokeWidth={2.5} />
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 };
