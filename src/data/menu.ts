@@ -6,7 +6,7 @@ import type { Lingote, Extra } from '../types';
  */
 export const CATEGORIAS_PERSONALIZACION = {
   bases: [
-    { id: 'b-pan', nombre: 'Pan Crujiente', precio: 0, disponible: true },
+    // { id: 'b-pan', nombre: 'Pan Crujiente', precio: 0, disponible: true },
     { id: 'b-pinto', nombre: 'Gallo Pinto', precio: 500, disponible: true },
   ],
   proteinas: [
@@ -39,13 +39,13 @@ export const MENU_LINGOTES: Lingote[] = [
   {
     id: 1,
     nombre: "Lingote Clásico",
-    precio: 1700,
+    precio: 1300,
     descripcion: "La esencia de la tradición española. Nuestra tortilla artesanal, jugosa y dorada, servida sobre pan crujiente y coronada con el alioli casero que lo empezó todo.",
     imagen: "clasico.webp",
     ingredientesBase: ["Tortilla de Patatas", "Pan", "Alioli"],
     alergenos: ["🥚", "🌽"],
     disponible: true,
-    personalizable: false // BLOQUEADO
+    personalizable: false 
   },
   {
     id: 2,
@@ -56,29 +56,29 @@ export const MENU_LINGOTES: Lingote[] = [
     ingredientesBase: ["Tortilla de Patatas", "Gallo Pinto", "Natilla"],
     alergenos: ["🥚", "🥛"],
     disponible: true,
-    personalizable: false // BLOQUEADO
+    personalizable:  false
   },
   {
     id: 3,
     nombre: "Lingote Patrón",
-    precio: 2700,
-    descripcion: "Para los que mandan en la mesa. Un lingote imponente cargado de cerdo mechado a fuego lento, la frescura del aguacate nacional y el toque vibrante de nuestra cebolla encurtida.",
+    precio: 3000,
+    descripcion: "Para los que mandan en la mesa. Un lingote imponente cargado con 100g de cerdo mechado a fuego lento, la frescura del aguacate nacional y el toque vibrante de nuestra cebolla encurtida.",
     imagen: "patron.webp",
     ingredientesBase: ["Tortilla de Patatas", "Cerdo Mechado", "Aguacate", "Cebolla Encurtida"],
     alergenos: ["🥚"],
     disponible: true,
-    personalizable: false // BLOQUEADO
+    personalizable: false 
   },
   {
     id: 5,
     nombre: "Lingote Supremo",
     precio: 4000,
-    descripcion: "La experiencia definitiva de fusión. Un festín donde no falta nada: gallo pinto, cerdo mechado, aguacate y natilla. Un homenaje total a la hermandad gastronómica.",
+    descripcion: "La experiencia definitiva de fusión. Un festín donde no falta nada: gallo pinto, 100g de cerdo mechado, aguacate y natilla. Un homenaje total a la hermandad gastronómica.",
     imagen: "supremo.webp",
     ingredientesBase: ["Tortilla de Patatas", "Gallo Pinto", "Cerdo Mechado", "Aguacate", "Cebolla Encurtida"],
     alergenos: ["🥚"],
     disponible: true,
-    personalizable: false // BLOQUEADO
+    personalizable: false 
   },
   {
     id: 99,

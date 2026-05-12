@@ -1,4 +1,4 @@
-export type Categoria = 'promociones' | 'lingotes' | 'combos' | 'bebidas' | 'postres';
+export type Categoria = 'promociones' | 'lingotes' | 'combos' | 'bebidas' | 'postres' | 'salsas';
 
 export interface ProductoMenu {
   id: number;

@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, PlusCircle, MinusCircle, ArrowLeft, Check, Sparkles } from 'lucide-react';
+import { X, PlusCircle, MinusCircle, ArrowLeft, Check, Sparkles, ChefHat } from 'lucide-react';
 import type { Lingote, Extra, ItemCarrito } from '../types';
 import { CATEGORIAS_PERSONALIZACION } from '../data/menu';
 
@@ -14,14 +14,30 @@ interface Props {
 type Paso = 'base' | 'proteina' | 'vegetal' | 'salsa' | 'cantidad';
 
 export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: Props) => {
-  const [pasoActual, setPasoActual] = useState<Paso>('base');
+  // Detectamos si es un lingote de receta fija (ID != 99)
+  const isFijo = lingote.id !== 99;
+  
+  // Definimos los pasos dinámicamente
+  const pasos: Paso[] = isFijo 
+    ? ['vegetal', 'salsa', 'cantidad'] 
+    : ['base', 'proteina', 'vegetal', 'salsa', 'cantidad'];
+
+  const [pasoActual, setPasoActual] = useState<Paso>(pasos[0]);
   const [base, setBase] = useState<Extra | null>(null);
   const [proteina, setProteina] = useState<Extra | null>(null);
   const [vegetales, setVegetales] = useState<Extra[]>([]);
   const [salsa, setSalsa] = useState<Extra | null>(null);
   const [cantidad, setCantidad] = useState(1);
 
-  const pasos: Paso[] = ['base', 'proteina', 'vegetal', 'salsa', 'cantidad'];
+  // Reiniciar el paso inicial cuando cambia el lingote o se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+        setPasoActual(pasos[0]);
+        setVegetales([]);
+        setSalsa(null);
+    }
+  }, [isOpen, lingote.id]);
+
   const indicePaso = pasos.indexOf(pasoActual);
 
   const extrasSeleccionados = useMemo(() => {
@@ -68,16 +84,6 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
       precioTotal: precioUnitarioFinal
     };
     onConfirmar(nuevoItem);
-    resetForm();
-  };
-
-  const resetForm = () => {
-    setPasoActual('base');
-    setBase(null);
-    setProteina(null);
-    setVegetales([]);
-    setSalsa(null);
-    setCantidad(1);
   };
 
   const renderContenidoPaso = () => {
@@ -94,7 +100,7 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
                   className={`p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${base?.id === item.id ? 'border-lingote-gold bg-white shadow-lg' : 'border-gray-100 bg-gray-50'}`}
                 >
                   <span className="font-black uppercase italic text-sm">{item.nombre}</span>
-                  <span className="text-xs font-bold text-gray-400">+{item.precio} ₡</span>
+                  <span className="text-xs font-bold text-gray-700">+{item.precio} ₡</span>
                 </button>
               ))}
             </div>
@@ -109,7 +115,7 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
                 onClick={() => { setProteina(null); siguientePaso(); }}
                 className={`p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${!proteina ? 'border-lingote-gold bg-white shadow-lg' : 'border-gray-100 bg-gray-50'}`}
               >
-                <span className="font-black uppercase italic text-sm text-gray-400 italic">Ninguna (Solo Tortilla)</span>
+                <span className="font-black uppercase italic text-sm text-gray-700 italic">Ninguna (Solo Tortilla)</span>
                 <span className="text-xs font-bold">0 ₡</span>
               </button>
               {CATEGORIAS_PERSONALIZACION.proteinas.map(item => (
@@ -120,7 +126,7 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
                   className={`p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${!item.disponible ? 'opacity-40 grayscale' : proteina?.id === item.id ? 'border-lingote-gold bg-white shadow-lg' : 'border-gray-100 bg-gray-50'}`}
                 >
                   <span className="font-black uppercase italic text-sm">{item.nombre} {!item.disponible && '(Agotado)'}</span>
-                  <span className="text-xs font-bold text-gray-400">+{item.precio} ₡</span>
+                  <span className="text-xs font-bold text-gray-700">+{item.precio} ₡</span>
                 </button>
               ))}
             </div>
@@ -129,7 +135,10 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
       case 'vegetal':
         return (
           <div className="space-y-4">
-            <h3 className="text-xl font-black italic uppercase text-lingote-dark">3. Toque de Frescura</h3>
+            <div className="flex flex-col">
+                <span className="text-[10px] font-black text-lingote-blue uppercase mb-1">Mejorá tu experiencia</span>
+                <h3 className="text-xl font-black italic uppercase text-lingote-dark">¿Añadimos algún extra?</h3>
+            </div>
             <div className="grid grid-cols-1 gap-3">
               {CATEGORIAS_PERSONALIZACION.vegetales.map(item => {
                 const isSelected = vegetales.some(v => v.id === item.id);
@@ -145,13 +154,13 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
                       </div>
                       <span className="font-black uppercase italic text-sm">{item.nombre}</span>
                     </div>
-                    <span className="text-xs font-bold text-gray-400">+{item.precio} ₡</span>
+                    <span className="text-xs font-bold text-gray-700">+{item.precio} ₡</span>
                   </button>
                 );
               })}
               <button 
                 onClick={siguientePaso}
-                className="w-full py-4 mt-4 bg-lingote-dark text-white font-black rounded-xl uppercase italic text-xs tracking-widest"
+                className="w-full py-4 mt-4 bg-lingote-dark text-white font-black rounded-xl uppercase italic text-xs tracking-widest shadow-lg active:scale-95 transition-all"
               >
                 Continuar a las salsas
               </button>
@@ -161,7 +170,10 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
       case 'salsa':
         return (
           <div className="space-y-4">
-            <h3 className="text-xl font-black italic uppercase text-lingote-dark">4. Elegí tu Salsa</h3>
+            <div className="flex flex-col">
+                <span className="text-[10px] font-black text-lingote-blue uppercase mb-1">Toque de autor</span>
+                <h3 className="text-xl font-black italic uppercase text-lingote-dark">Bañalo con una Salsa</h3>
+            </div>
             <div className="grid grid-cols-1 gap-3">
               {CATEGORIAS_PERSONALIZACION.salsas.map(item => (
                 <button 
@@ -170,16 +182,22 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
                   className={`p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${salsa?.id === item.id ? 'border-lingote-gold bg-white shadow-lg' : 'border-gray-100 bg-gray-50'}`}
                 >
                   <span className="font-black uppercase italic text-sm">{item.nombre}</span>
-                  <span className="text-xs font-bold text-gray-400">+{item.precio} ₡</span>
+                  <span className="text-xs font-bold text-gray-700">+{item.precio} ₡</span>
                 </button>
               ))}
+              <button 
+                onClick={() => { setSalsa(null); siguientePaso(); }}
+                className="w-full py-4 mt-2 text-gray-400 font-bold uppercase italic text-[10px] hover:text-lingote-dark transition-colors"
+              >
+                Sin salsa extra
+              </button>
             </div>
           </div>
         );
       case 'cantidad':
         return (
           <div className="space-y-8 flex flex-col items-center py-10">
-            <h3 className="text-2xl font-black italic uppercase text-lingote-dark text-center">¡Listo! ¿Cuántos pedimos?</h3>
+            <h3 className="text-2xl font-black italic uppercase text-lingote-dark text-center leading-tight">¿Cuántos Lingotes <br/> preparamos?</h3>
             <div className="flex items-center gap-8 text-lingote-blue">
                 <button onClick={() => setCantidad(c => Math.max(1, c-1))} className="active:scale-90 transition-transform bg-gray-100 p-4 rounded-full"><MinusCircle size={40} /></button>
                 <span className="text-6xl font-black italic tabular-nums w-20 text-center text-lingote-dark">{cantidad}</span>
@@ -208,11 +226,11 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
             <div className="p-6 border-b border-gray-100 bg-white shrink-0 z-10">
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-3">
-                   <Sparkles className="text-lingote-gold" />
+                   {isFijo ? <ChefHat className="text-lingote-red" /> : <Sparkles className="text-lingote-gold" />}
                    <div>
-                     <span className="text-[10px] font-black uppercase text-lingote-red leading-none">Paso {indicePaso + 1} de 5</span>
+                     <span className="text-[10px] font-black uppercase text-lingote-red leading-none">Paso {indicePaso + 1} de {pasos.length}</span>
                      <h2 className="text-xl font-black text-lingote-dark uppercase italic tracking-tighter leading-tight">
-                        Armá tu Lingote
+                        {isFijo ? 'Añadir Extras' : 'Armá tu Lingote'}
                      </h2>
                    </div>
                 </div>
@@ -241,7 +259,7 @@ export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: 
                {pasoActual === 'cantidad' ? (
                  <button 
                   onClick={finalizarPersonalizacion}
-                  className="px-10 py-5 bg-lingote-gold text-lingote-dark font-black text-lg rounded-2xl shadow-xl uppercase italic flex items-center gap-2"
+                  className="px-10 py-5 bg-lingote-blue text-white font-black text-lg rounded-2xl shadow-xl uppercase italic flex items-center gap-2 active:scale-95 transition-all"
                  >
                     Confirmar Pedido ⚡
                  </button>

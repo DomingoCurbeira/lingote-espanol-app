@@ -10,7 +10,7 @@ import { PersonalizacionModal } from './components/PersonalizacionModal';
 import { CartDrawer } from './components/CartDrawer';
 import { TiqueteGourmet } from './components/TiqueteGourmet';
 import { UbicacionSeccion } from './components/UbicacionSeccion';
-import { MENU_LINGOTES, MENU_BEBIDAS, MENU_COMBOS, MENU_POSTRES, MENU_PROMOCIONES } from './data'; 
+import { MENU_LINGOTES, MENU_BEBIDAS, MENU_POSTRES, MENU_PROMOCIONES, MENU_SALSAS } from './data'; 
 import { useUserStore } from './store/useUserStore';
 import { useCartStore } from './store/useCartStore'; 
 import type { Categoria, ProductoMenu, Lingote, ItemCarrito, DatosPago } from './types';
@@ -181,15 +181,15 @@ function App() {
                       <ProductoCard key={item.id} item={item} onAdd={agregarAlCarrito} />
                     ))}
 
-                    {categoria === 'combos' && MENU_COMBOS.map(item => (
-                      <ProductoCard key={item.id} item={item} onAdd={agregarAlCarrito} />
-                    ))}
-
                     {categoria === 'bebidas' && MENU_BEBIDAS.map(item => (
                       <ProductoCard key={item.id} item={item} onAdd={agregarAlCarrito} />
                     ))}
 
                     {categoria === 'postres' && MENU_POSTRES.map(item => (
+                      <ProductoCard key={item.id} item={item} onAdd={agregarAlCarrito} />
+                    ))}
+
+                    {categoria === 'salsas' && MENU_SALSAS.map(item => (
                       <ProductoCard key={item.id} item={item} onAdd={agregarAlCarrito} />
                     ))}
                   </motion.div>

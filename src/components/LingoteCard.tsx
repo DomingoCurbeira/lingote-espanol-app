@@ -112,7 +112,7 @@ export const LingoteCard = ({ lingote, onSelect }: Props) => {
                 ) : (
                   <ChefHat size={16} className="text-lingote-red" />
                 )}
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">
                   {personalizable ? 'Crea tu propia versión' : 'Receta Original'}
                 </span>
             </div>
@@ -121,7 +121,7 @@ export const LingoteCard = ({ lingote, onSelect }: Props) => {
                 {nombre}
             </h3>
             
-            <p className="text-gray-500 text-sm leading-relaxed font-medium italic mb-6">
+            <p className="text-gray-700 text-sm leading-relaxed font-medium italic mb-6">
                 {descripcion}
             </p>
 

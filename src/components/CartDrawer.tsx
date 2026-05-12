@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Plus, Minus, ShoppingBag, CreditCard, Banknote, Clock, Lock, UserCheck } from 'lucide-react';
+import { X, Trash2, Plus, Minus, ShoppingBag, CreditCard, Banknote, Clock, Lock, UserCheck, FlaskConical } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
 import { useUserStore } from '../store/useUserStore';
 import { generarMensajeWhatsApp } from '../utils/whatsapp';
@@ -8,6 +8,7 @@ import type { MetodoPago, DatosPago, ItemCarrito } from '../types';
 import { mostrarAlertaPago } from '../utils/alerts';
 import { PagoSinpeAyuda } from './PagoSinpeAyuda';
 import { obtenerEstadoTienda } from '../config/horarios';
+import { MENU_SALSAS } from '../data/salsas';
 
 interface Props {
   isOpen: boolean;
@@ -17,7 +18,7 @@ interface Props {
 }
 
 export const CartDrawer = ({ isOpen, onClose, onFinalizado, onRequireUser }: Props) => {
-  const { carrito, removeItem, updateCantidad, getTotal } = useCartStore();
+  const { carrito, removeItem, updateCantidad, getTotal, addItem } = useCartStore();
   const { usuario, agregarPedidoAlHistorial } = useUserStore();
 
   const [metodoPago, setMetodoPago] = useState<MetodoPago | null>(null);
@@ -27,10 +28,25 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado, onRequireUser }: Pro
 
   const { estaAbierto: abierto, esCierreInminente, horarioTexto, horaLimitePedidos } = obtenerEstadoTienda();
 
+  // Detectar si ya hay alguna salsa en el carrito (IDs del 50 al 59)
+  const tieneSalsas = useMemo(() => 
+    carrito.some(item => item.producto.id >= 50 && item.producto.id <= 59),
+  [carrito]);
+
   const enfocarComprobante = () => {
     setTimeout(() => {
       inputRef.current?.focus();
     }, 600);
+  };
+
+  const handleAddSalsaRapida = (salsa: any) => {
+    addItem({
+      idUnico: crypto.randomUUID(),
+      producto: salsa,
+      extras: [],
+      cantidad: 1,
+      precioTotal: salsa.precio
+    });
   };
 
   const handleFinalizarPedido = async () => {
@@ -95,44 +111,80 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado, onRequireUser }: Pro
                   <p className="font-bold uppercase tracking-widest text-xs">El carrito está vacío</p>
                 </div>
               ) : (
-                carrito.map((item) => {
-                  const fallbackImage = '/logo_lingote_oficial_ligero.webp';
-                  return (
-                    <div key={item.idUnico} className="flex gap-4 border-b border-gray-50 pb-6">
-                      <img 
-                        src={item.producto.imagen ? `/${item.producto.imagen}` : fallbackImage} 
-                        className="w-20 h-20 object-contain bg-gray-50 rounded-2xl border border-gray-100"
-                        alt={item.producto.nombre} 
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = fallbackImage;
-                        }}
-                      />
-                      <div className="flex-grow">
-                        <div className="flex justify-between">
-                          <h4 className="font-black uppercase italic text-sm text-lingote-dark">{item.producto.nombre}</h4>
-                          <button onClick={() => removeItem(item.idUnico)} className="text-gray-300 hover:text-lingote-red transition-colors">
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                        {item.extras.length > 0 && (
-                          <p className="text-[10px] text-lingote-blue font-bold italic mt-1">
-                            + {item.extras.map(e => e.nombre).join(', ')}
-                          </p>
-                        )}
-                        <div className="flex justify-between items-center mt-3">
-                          <div className="flex items-center gap-3 bg-gray-100 rounded-xl px-2 py-1">
-                            <button onClick={() => updateCantidad(item.idUnico, -1)} className="p-1 hover:text-lingote-blue"><Minus size={14} /></button>
-                            <span className="font-black text-sm w-4 text-center">{item.cantidad}</span>
-                            <button onClick={() => updateCantidad(item.idUnico, 1)} className="p-1 hover:text-lingote-blue"><Plus size={14} /></button>
+                <div className="space-y-6">
+                  {carrito.map((item) => {
+                    const fallbackImage = '/logo_lingote_oficial_ligero.webp';
+                    return (
+                      <div key={item.idUnico} className="flex gap-4 border-b border-gray-50 pb-6 last:border-0">
+                        <img 
+                          src={item.producto.imagen ? `/${item.producto.imagen}` : fallbackImage} 
+                          className="w-20 h-20 object-contain bg-gray-50 rounded-2xl border border-gray-100"
+                          alt={item.producto.nombre} 
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = fallbackImage;
+                          }}
+                        />
+                        <div className="flex-grow">
+                          <div className="flex justify-between">
+                            <h4 className="font-black uppercase italic text-sm text-lingote-dark">{item.producto.nombre}</h4>
+                            <button onClick={() => removeItem(item.idUnico)} className="text-gray-300 hover:text-lingote-red transition-colors">
+                              <Trash2 size={16} />
+                            </button>
                           </div>
-                          <span className="font-black text-lingote-dark italic text-sm tabular-nums">
-                            ₡{(item.precioTotal * item.cantidad).toLocaleString()}
-                          </span>
+                          {item.extras.length > 0 && (
+                            <p className="text-[10px] text-lingote-blue font-bold italic mt-1">
+                              + {item.extras.map(e => e.nombre).join(', ')}
+                            </p>
+                          )}
+                          <div className="flex justify-between items-center mt-3">
+                            <div className="flex items-center gap-3 bg-gray-100 rounded-xl px-2 py-1">
+                              <button onClick={() => updateCantidad(item.idUnico, -1)} className="p-1 hover:text-lingote-blue"><Minus size={14} /></button>
+                              <span className="font-black text-sm w-4 text-center">{item.cantidad}</span>
+                              <button onClick={() => updateCantidad(item.idUnico, 1)} className="p-1 hover:text-lingote-blue"><Plus size={14} /></button>
+                            </div>
+                            <span className="font-black text-lingote-dark italic text-sm tabular-nums">
+                              ₡{(item.precioTotal * item.cantidad).toLocaleString()}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                    );
+                  })}
+
+                  {/* SECCIÓN CROSS-SELL SALSAS */}
+                  {!tieneSalsas && (
+                    <div className="mt-8 pt-6 border-t border-gray-100 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                      <div className="flex items-center gap-2 mb-4">
+                        <FlaskConical size={14} className="text-lingote-blue" />
+                        <h5 className="text-[10px] font-black uppercase italic text-lingote-dark tracking-widest">
+                          ¿Le ponemos una salsa de autor?
+                        </h5>
+                      </div>
+                      <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar px-1">
+                        {MENU_SALSAS.map(salsa => (
+                          <button
+                            key={salsa.id}
+                            onClick={() => handleAddSalsaRapida(salsa)}
+                            className="shrink-0 bg-white border border-gray-200 p-3 rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center gap-1 min-w-[95px]"
+                          >
+                            <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mb-1">
+                              <img 
+                                src={`/${salsa.imagen}`} 
+                                alt={salsa.nombre} 
+                                className="w-7 h-7 object-contain"
+                                onError={(e) => (e.target as any).src = '/logo_lingote_oficial_ligero.webp'}
+                              />
+                            </div>
+                            <span className="text-[8px] font-black uppercase italic text-lingote-dark text-center leading-none">
+                              {salsa.nombre.split(' ')[0]}
+                            </span>
+                            <span className="text-[9px] font-black text-lingote-blue italic mt-0.5">₡{salsa.precio}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  );
-                })
+                  )}
+                </div>
               )}
             </div>
 

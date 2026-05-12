@@ -14,8 +14,17 @@ export const MENU_POSTRES: ProductoMenu[] = [
     id: 31, 
     nombre: "Mestizaje Caprichoso", 
     precio: 1950, 
-    desc: "Triffle de cremoso de leche con cookies", 
-    imagen: "tentacion.webp", 
+    desc: "Refrescante Triffle de 10oz: Capas de galleta María crujiente y cremoso artesanal de limón. El cierre perfecto para tu paladar.", 
+    imagen: "trifle.webp", 
+    alergenos: ["🥛"],
+    disponible: true
+  },
+  { 
+    id: 32, 
+    nombre: "Lingote Vasco", 
+    precio: 3000, 
+    desc: "Tarta de Queso Vasca, Tipica Española", 
+    imagen: "vasca.webp", 
     alergenos: ["🥛"],
     disponible: true
   }

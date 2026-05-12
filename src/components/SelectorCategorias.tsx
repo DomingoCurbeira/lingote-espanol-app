@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Tag, Box, Coffee, Utensils, IceCream } from 'lucide-react';
+import { Tag, Coffee, Utensils, IceCream, FlaskConical } from 'lucide-react';
 import type { Categoria } from '../types';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 const categorias: { id: Categoria; label: string; icon: any; color: string }[] = [
   { id: 'promociones', label: 'Promos', icon: Tag, color: 'bg-red-500' },
   { id: 'lingotes', label: 'Lingotes', icon: Utensils, color: 'bg-lingote-gold' },
-  { id: 'combos', label: 'Combos', icon: Box, color: 'bg-lingote-blue' },
+  { id: 'salsas', label: 'Salsas', icon: FlaskConical, color: 'bg-green-600' },
   { id: 'bebidas', label: 'Bebidas', icon: Coffee, color: 'bg-blue-400' },
   { id: 'postres', label: 'Postres', icon: IceCream, color: 'bg-purple-500' },
 ];
@@ -18,7 +18,7 @@ const categorias: { id: Categoria; label: string; icon: any; color: string }[] =
 export const SelectorCategorias = ({ activa, onChange }: Props) => {
   return (
     <nav className="p-4 bg-white/50 backdrop-blur-md sticky top-20 z-40">
-      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 max-w-4xl mx-auto">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 max-w-4xl mx-auto">
         {categorias.map((cat) => {
           const Icon = cat.icon;
           const isSelected = activa === cat.id;
