@@ -43,7 +43,7 @@ export const generarMensajeWhatsApp = (
 
   const mensajeEncoded = encodeURIComponent(mensaje);
   
-  const miTelefono = "50660437179"; // Prefijo Costa Rica + Número del Chef
+  const miTelefono = "34639835391"; // Número Temporal de Pruebas (España)
   
   return `https://wa.me/${miTelefono}?text=${mensajeEncoded}`;
 };
