@@ -26,22 +26,39 @@ export const TiqueteGourmet = ({ pedido, onNuevoPedido }: Props) => {
     const element = document.getElementById('seccion-tiquete');
     if (!element) return;
 
+    // Pequeño delay para asegurar que el DOM esté listo y las imágenes cargadas
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     try {
       const canvas = await html2canvas(element, {
         backgroundColor: '#ffffff',
-        scale: 3, // Mayor calidad
-        logging: false,
-        useCORS: true
+        scale: 2, // Reducimos un poco el scale para evitar saturación de memoria en móviles
+        logging: true, // Habilitamos logging para ver errores en consola
+        useCORS: true,
+        allowTaint: true,
+        scrollX: 0,
+        scrollY: -window.scrollY, // Corregir posición si hay scroll
+        onclone: (clonedDoc) => {
+          // Aseguramos que el elemento clonado sea visible para la captura
+          const el = clonedDoc.getElementById('seccion-tiquete');
+          if (el) el.style.boxShadow = 'none';
+        }
       });
       
+      const dataUrl = canvas.toDataURL('image/png');
+      
+      // Método alternativo de descarga para móviles/PWA
       const link = document.createElement('a');
-      link.download = `Tiquete_Lingote_${pedido.id}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.setAttribute('href', dataUrl);
+      link.setAttribute('download', `Tiquete_Lingote_${pedido.id}.png`);
+      document.body.appendChild(link);
       link.click();
-      mostrarToast('Tiquete guardado en tu galería 📸');
+      document.body.removeChild(link);
+      
+      mostrarToast('Tiquete guardado 📸');
     } catch (error) {
       console.error('Error al generar tiquete:', error);
-      mostrarToast('No se pudo guardar la imagen ❌');
+      mostrarToast('Error al procesar imagen ❌');
     }
   };
 
