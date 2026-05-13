@@ -8,7 +8,7 @@ export const MENU_PROMOCIONES: Promocion[] = [
     precioAnterior: 3400,
     ahorro: 400,
     desc: 'La opción más rápida: 1 Bocata Real (Pan Artesanal + Tortilla) + 1 Bebida Natural.',
-    imagen: 'promo-express.webp',
+    imagen: 'bocata.webp',
     disponible: true,
   },
   {
