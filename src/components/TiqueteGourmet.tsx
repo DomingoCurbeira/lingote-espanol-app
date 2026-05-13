@@ -1,5 +1,7 @@
 
-import { Printer, RefreshCw } from 'lucide-react';
+import { Printer, RefreshCw, Download } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { mostrarToast } from '../utils/alerts';
 import type { ItemCarrito, Usuario, DatosPago } from '../types';
 
 interface Props {
@@ -18,6 +20,29 @@ export const TiqueteGourmet = ({ pedido, onNuevoPedido }: Props) => {
   
   const imprimirTiquete = () => {
     window.print();
+  };
+
+  const descargarTiquete = async () => {
+    const element = document.getElementById('seccion-tiquete');
+    if (!element) return;
+
+    try {
+      const canvas = await html2canvas(element, {
+        backgroundColor: '#ffffff',
+        scale: 3, // Mayor calidad
+        logging: false,
+        useCORS: true
+      });
+      
+      const link = document.createElement('a');
+      link.download = `Tiquete_Lingote_${pedido.id}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      mostrarToast('Tiquete guardado en tu galería 📸');
+    } catch (error) {
+      console.error('Error al generar tiquete:', error);
+      mostrarToast('No se pudo guardar la imagen ❌');
+    }
   };
 
   return (
@@ -107,10 +132,16 @@ export const TiqueteGourmet = ({ pedido, onNuevoPedido }: Props) => {
       {/* BOTONES DE ACCIÓN (Ocultos al imprimir) */}
       <div className="grid grid-cols-1 w-full gap-3 mt-8 no-print">
         <button 
+          onClick={descargarTiquete}
+          className="flex items-center justify-center gap-2 bg-lingote-gold text-lingote-dark py-4 rounded-2xl font-black uppercase italic shadow-lg active:scale-95 transition-all"
+        >
+          <Download size={20} /> Guardar Imagen 📸
+        </button>
+        <button 
           onClick={imprimirTiquete}
           className="flex items-center justify-center gap-2 bg-lingote-blue text-white py-4 rounded-2xl font-black uppercase italic shadow-lg active:scale-95 transition-all"
         >
-          <Printer size={20} /> Guardar / Imprimir
+          <Printer size={20} /> Imprimir Tiquete
         </button>
         <button 
           onClick={onNuevoPedido}
