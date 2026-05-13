@@ -92,6 +92,7 @@ export const TiqueteGourmet = ({ pedido, onNuevoPedido }: Props) => {
           <img 
             src="/logo_lingote_oficial_ligero.webp" 
             alt="Logo" 
+            crossOrigin="anonymous"
             className="w-24 h-24 object-contain mb-2" 
           />
           <h2 className="font-bold text-lg uppercase tracking-tight">El Lingote Español</h2>
