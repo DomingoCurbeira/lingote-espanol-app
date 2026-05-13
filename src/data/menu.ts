@@ -81,7 +81,7 @@ export const MENU_LINGOTES: Lingote[] = [
     id: 6,
     nombre: "Bocata Español",
     precio: 2000,
-    descripcion: "Nuestra tortilla artesanal jugosa, servida en pan de baguette artesanal de El Molino con aliño tradicional. ¡Ideal para el camino!",
+    descripcion: "Nuestra tortilla artesanal jugosa, servida en pan de baguette artesanal. ¡Ideal para el camino!",
     imagen: "bocata.webp",
     ingredientesBase: ["Tortilla de Patatas", "Pan Artesano", "Tomate", "AOVE"],
     alergenos: ["🥚", "🌽"],
