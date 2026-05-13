@@ -65,12 +65,20 @@ export const mostrarAlertaPago = (metodo: 'sinpe' | 'efectivo', nombre: string) 
       </span>
     ),
     html: (
-      <p className="text-gray-500 font-medium italic">
-        Tu pago por SINPE ha sido registrado. <br/> 
-        <span className="text-lingote-blue font-black uppercase text-lg">
+      <div className="space-y-4">
+        <p className="text-gray-500 font-medium italic leading-tight">
+          Tu pago por SINPE ha sido registrado en el sistema.
+        </p>
+        <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+          <p className="text-lingote-blue font-black uppercase text-[10px] tracking-widest mb-1 italic">⚠️ REQUISITO DE ENTREGA:</p>
+          <p className="text-lingote-dark font-bold text-xs italic">
+            Debés mostrar el comprobante de tu banco al retirar el pedido.
+          </p>
+        </div>
+        <p className="text-lingote-blue font-black uppercase text-lg">
           ¡En 15 minutos retirá tu pedido <br/> en nuestro local! 🚀
-        </span>
-      </p>
+        </p>
+      </div>
     ),
     icon: 'success',
     confirmButtonText: '¡LISTO, VOY PARA ALLÁ!',

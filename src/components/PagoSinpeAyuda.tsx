@@ -113,7 +113,8 @@ const abrirBanco = (url: string) => {
       </div>
 
       <p className="text-[8px] text-center text-gray-400 font-bold uppercase italic px-2 leading-tight">
-        Copiá los datos y tocá tu banco para pagar.
+        Copiá los datos y tocá tu banco para pagar. <br/>
+        <span className="text-lingote-blue">Guardá tu comprobante, se pedirá en caja.</span>
       </p>
     </div>
   );

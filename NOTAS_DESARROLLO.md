@@ -1,11 +1,24 @@
 # Bitácora de Desarrollo - El Lingote Español 🧠🥔
 
-Este documento detalla las funcionalidades implementadas y la arquitectura técnica del ecosistema digital de "El Lingote Español", actualizado al **12 de mayo de 2026**.
+Este documento detalla las funcionalidades implementadas y la arquitectura técnica del ecosistema digital de "El Lingote Español", actualizado al **13 de mayo de 2026**.
+
+## 🚀 Novedades y Mejoras de Seguridad (Hoy)
+
+### 1. Blindaje Anti-Fraude (SINPE Móvil)
+- **Protocolo de Verificación:** Se estableció un flujo de seguridad donde el tiquete digital es solo una referencia. La validez real depende de la comprobación del mensaje de WhatsApp y el recibo bancario en el terminal del operador.
+- **Etiqueta de Seguridad:** El tiquete generado ahora incluye la leyenda automática: *"⚠️ VÁLIDO TRAS VERIFICACIÓN EN CAJA"*.
+- **Educación al Cliente:** Se actualizaron las alertas finales y el asistente de pago para recordar al usuario que debe conservar y mostrar su comprobante bancario al retirar el pedido.
+
+### 2. Estabilidad de Tiquete Digital
+- **Corrección de Error "oklch":** Se migraron todos los estilos del tiquete de clases de Tailwind CSS 4 a colores Hexadecimales fijos. Esto soluciona la incompatibilidad de `html2canvas` con los nuevos formatos de color y garantiza descargas exitosas en todos los dispositivos.
+- **Optimización Visual:** Uso de logo en blanco y negro (SVG) para máxima compatibilidad y legibilidad en impresiones térmicas o capturas de pantalla.
+
+---
 
 ## 📋 Resumen del Ecosistema
 - **Core:** Aplicación PWA (Progressive Web App) para pedidos rápidos y gestión de marca.
 - **Admin:** Panel de Control "Cerebro Real" para el operador único.
-- **Tecnología:** React 19, TypeScript, Tailwind CSS 4, Zustand (Persistencia), Lucide Icons, Framer Motion.
+- **Tecnología:** React 19, TypeScript, Tailwind CSS 4, Zustand (Persistencia), Lucide Icons, Framer Motion, html2canvas (Captura de tiquetes).
 
 ---
 
@@ -32,20 +45,20 @@ Este documento detalla las funcionalidades implementadas y la arquitectura técn
 
 Acceso privado protegido por PIN de 6 dígitos.
 
-### 1. Caja Registradora y Verificación (Actualizado)
+### 1. Caja Registradora y Verificación
 - **POS Rápido:** Interfaz optimizada para ventas de mostrador.
 - **Verificación SINPE Móvil:** Sistema de auditoría que permite marcar pagos como "Verificados" tras comprobar los últimos 4 dígitos del comprobante, separando el "Dinero Real" del "Dinero en Proceso".
 - **Alertas de Acción:** Indicadores visuales para ventas pendientes de confirmación.
 
-### 2. Reportes y Seguridad (Actualizado)
+### 2. Reportes y Seguridad
 - **Cierre de Jornada:** Exportación de reporte profesional en PNG.
 - **Gestión de PIN:** Posibilidad de actualizar el PIN de seguridad de 6 dígitos directamente desde el panel.
 - **Cierre de Sesión:** Botón de LogOut manual para asegurar el acceso en dispositivos compartidos.
 
-### 3. Resiliencia de Datos (Nuevo)
+### 3. Resiliencia de Datos
 - **Copia de Seguridad:** Sistema de Exportación/Importación de base de datos en formato JSON, permitiendo la migración de datos entre dispositivos y protección contra pérdida de memoria local.
 
-### 3. Ingeniería de Costos y Stock
+### 4. Ingeniería de Costos y Stock
 - **Control de Inventario:** Interruptores ON/OFF que desactivan productos en la App del cliente instantáneamente.
 - **Calculadora de Rentabilidad:** Dashboard que calcula el margen de ganancia real basado en el precio actual de los insumos (papa, huevo, carnes).
 - **Lista de Compras Automática:** Basada en las recetas (escandallos), genera una orden de compra descargable con las cantidades exactas necesarias por ingrediente.

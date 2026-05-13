@@ -1,4 +1,3 @@
-
 import { Printer, RefreshCw, Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { mostrarToast } from '../utils/alerts';
@@ -16,6 +15,9 @@ interface Props {
   onNuevoPedido: () => void;
 }
 
+// Logo Oficial SVG en Base64 (Mucho más estable para capturas y alta calidad)
+const LOGO_BASE64 = "../../public/logo_transparente.svg";
+
 export const TiqueteGourmet = ({ pedido, onNuevoPedido }: Props) => {
   
   const imprimirTiquete = () => {
@@ -24,41 +26,77 @@ export const TiqueteGourmet = ({ pedido, onNuevoPedido }: Props) => {
 
   const descargarTiquete = async () => {
     const element = document.getElementById('seccion-tiquete');
-    if (!element) return;
+    if (!element) {
+      mostrarToast('No se encontró el tiquete ❌', 'error');
+      return;
+    }
 
-    // Pequeño delay para asegurar que el DOM esté listo y las imágenes cargadas
-    await new Promise(resolve => setTimeout(resolve, 500));
+    mostrarToast('Generando imagen... 📸', 'info');
+
+    // Forzar scroll arriba para evitar recortes en la captura
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+
+    // Delay para asegurar renderizado completo y que el teclado se oculte si estaba abierto
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
       const canvas = await html2canvas(element, {
         backgroundColor: '#ffffff',
-        scale: 2, // Reducimos un poco el scale para evitar saturación de memoria en móviles
-        logging: true, // Habilitamos logging para ver errores en consola
+        scale: 2, // 2x es suficiente para legibilidad y más ligero en móviles
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
+        logging: false,
         scrollX: 0,
-        scrollY: -window.scrollY, // Corregir posición si hay scroll
+        scrollY: -window.scrollY,
         onclone: (clonedDoc) => {
-          // Aseguramos que el elemento clonado sea visible para la captura
           const el = clonedDoc.getElementById('seccion-tiquete');
-          if (el) el.style.boxShadow = 'none';
+          if (el) {
+            el.style.boxShadow = 'none';
+            el.style.border = 'none';
+            el.style.margin = '0';
+            el.style.width = '400px'; // Forzar ancho fijo en el clon para consistencia
+          }
         }
       });
       
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = canvas.toDataURL('image/png', 0.9);
       
-      // Método alternativo de descarga para móviles/PWA
+      // Intentar usar Web Share API si está disponible (mejor UX en móviles)
+      if (navigator.share && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        try {
+          const response = await fetch(dataUrl);
+          const blob = await response.blob();
+          const file = new File([blob], `Tiquete_Lingote_${pedido.id}.png`, { type: 'image/png' });
+          
+          const shareData = {
+            files: [file],
+            title: 'Tiquete El Lingote Español',
+            text: `Tiquete de compra #${pedido.id}`
+          };
+
+          if (navigator.canShare && navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+            mostrarToast('Tiquete compartido 🚀');
+            return;
+          }
+        } catch (shareError) {
+          console.log('Error compartiendo:', shareError);
+        }
+      }
+
+      // Descarga normal como fallback o para escritorio
       const link = document.createElement('a');
-      link.setAttribute('href', dataUrl);
-      link.setAttribute('download', `Tiquete_Lingote_${pedido.id}.png`);
+      link.href = dataUrl;
+      link.download = `Tiquete_Lingote_${pedido.id}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
       mostrarToast('Tiquete guardado 📸');
+
     } catch (error) {
       console.error('Error al generar tiquete:', error);
-      mostrarToast('Error al procesar imagen ❌');
+      mostrarToast('Error al procesar imagen ❌', 'error');
     }
   };
 
@@ -85,24 +123,33 @@ export const TiqueteGourmet = ({ pedido, onNuevoPedido }: Props) => {
       {/* EL TIQUETE VISUAL */}
       <div 
         id="seccion-tiquete"
-        className="bg-white p-8 shadow-xl w-full border border-gray-100 rounded-sm"
-        style={{ fontFamily: "'Courier New', Courier, monospace" }}
+        className="p-8 w-full border rounded-sm"
+        style={{ 
+          fontFamily: "'Courier New', Courier, monospace", 
+          backgroundColor: '#ffffff', 
+          borderColor: '#f3f4f6',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+        }}
       >
         <div className="flex flex-col items-center mb-4 text-center">
           <img 
-            src="/logo_lingote_oficial_ligero.webp" 
+            src={LOGO_BASE64} 
             alt="Logo" 
-            crossOrigin="anonymous"
-            className="w-24 h-24 object-contain mb-2" 
+            className="w-32 h-32 object-contain mb-2" 
           />
-          <h2 className="font-bold text-lg uppercase tracking-tight">El Lingote Español</h2>
-          <p className="text-[10px] uppercase">San Rafael de Oreamuno, Cartago</p>
-          <div className="w-full border-b border-dashed border-gray-400 my-3" />
-          <p className="font-bold text-sm italic">ORDEN: #{pedido.id}</p>
-          <div className="w-full border-b border-dashed border-gray-400 mt-3" />
+          <h2 className="font-bold text-lg uppercase tracking-tight" style={{ color: '#1a1a1a' }}>El Lingote Español</h2>
+          <p className="text-[10px] uppercase" style={{ color: '#4b5563' }}>San Rafael de Oreamuno, Cartago</p>
+          <div className="w-full border-b border-dashed my-3" style={{ borderColor: '#9ca3af' }} />
+          <p className="font-bold text-sm italic" style={{ color: '#1a1a1a' }}>ORDEN: #{pedido.id}</p>
+          <div className="w-full py-1 px-2 mt-2 rounded-md" style={{ backgroundColor: '#f3f4f6' }}>
+            <p className="text-[9px] font-black text-center uppercase tracking-tighter" style={{ color: '#4b5563' }}>
+              ⚠️ Válido tras verificación en caja
+            </p>
+          </div>
+          <div className="w-full border-b border-dashed mt-3" style={{ borderColor: '#9ca3af' }} />
         </div>
 
-        <div className="text-[11px] space-y-1 mb-4">
+        <div className="text-[11px] space-y-1 mb-4" style={{ color: '#1a1a1a' }}>
           <p>FECHA: {pedido.fecha}</p>
           <p>CLIENTE: {pedido.usuario.nombre.toUpperCase()}</p>
           <p>PAGO: {pedido.pago.metodo.toUpperCase()}</p>
@@ -111,44 +158,43 @@ export const TiqueteGourmet = ({ pedido, onNuevoPedido }: Props) => {
 
         <div className="space-y-3 mb-4">
           {pedido.items.map((item, index) => (
-            <div key={index} className="text-[12px]">
+            <div key={index} className="text-[12px]" style={{ color: '#1a1a1a' }}>
               <div className="flex justify-between font-bold">
                 <span>{item.cantidad}x {item.producto.nombre.toUpperCase()}</span>
                 <span>₡{(item.precioTotal * item.cantidad).toLocaleString()}</span>
               </div>
               {item.extras.map((extra, i) => (
-                <p key={i} className="text-[10px] text-gray-500 ml-4">+ {extra.nombre}</p>
+                <p key={i} className="text-[10px] ml-4" style={{ color: '#6b7280' }}>+ {extra.nombre}</p>
               ))}
             </div>
           ))}
         </div>
 
-        <div className="w-full border-b border-dashed border-gray-400 mb-4" />
+        <div className="w-full border-b border-dashed mb-4" style={{ borderColor: '#9ca3af' }} />
 
-        <div className="flex justify-between items-center py-2 bg-gray-50 px-2">
-          <span className="font-bold text-sm uppercase">Total:</span>
-          <span className="font-black text-xl italic">
+        <div className="flex justify-between items-center py-2 px-2" style={{ backgroundColor: '#f9fafb' }}>
+          <span className="font-bold text-sm uppercase" style={{ color: '#1a1a1a' }}>Total:</span>
+          <span className="font-black text-xl italic" style={{ color: '#1a1a1a' }}>
             ₡{pedido.total.toLocaleString()}
           </span>
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-[10px] font-bold italic tracking-widest uppercase">¡Gracias por su compra!</p>
-          <p className="text-[9px] mt-1 italic">Pura Vida, Olé</p>
-          <div className="mt-4 h-6 w-full bg-[repeating-linear-gradient(90deg,#000,#000_1px,#fff_1px,#fff_3px)] opacity-10" />
+          <p className="text-[10px] font-bold italic tracking-widest uppercase" style={{ color: '#1a1a1a' }}>¡Gracias por su compra!</p>
+          <p className="text-[9px] mt-1 italic" style={{ color: '#4b5563' }}>Pura Vida, Olé</p>
+          <div className="mt-4 h-6 w-full opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#000,#000 1px,#fff 1px,#fff 3px)' }} />
         </div>
 
-        {/* Dentro de TiqueteGourmet.tsx */}
-        <div className="text-center mt-4 border-t border-dashed border-gray-200 pt-4">
-        <p className="text-[10px] font-bold uppercase">📍 Dirección:</p>
-        <p className="text-[10px]">200m Este de la Iglesia, San Rafael de Oreamuno</p>
-        <p className="text-[10px] font-bold uppercase mt-2">⏰ Horario:</p>
-        <p className="text-[10px]">Lun-Sab: 10:00 PM - 16:00 PM</p>
+        <div className="text-center mt-4 pt-4" style={{ borderTop: '1px dashed #e5e7eb' }}>
+          <p className="text-[10px] font-bold uppercase" style={{ color: '#1a1a1a' }}>📍 Dirección:</p>
+          <p className="text-[10px]" style={{ color: '#4b5563' }}>200m Este de la Iglesia, San Rafael de Oreamuno</p>
+          <p className="text-[10px] font-bold uppercase mt-2" style={{ color: '#1a1a1a' }}>⏰ Horario:</p>
+          <p className="text-[10px]" style={{ color: '#4b5563' }}>Lun-Sab: 10:00 AM - 16:00 PM</p>
         </div>
       </div>
 
       {/* BOTONES DE ACCIÓN (Ocultos al imprimir) */}
-      <div className="grid grid-cols-1 w-full gap-3 mt-8 no-print">
+      <div className="grid grid-cols-1 w-full gap-3 mt-8 no-print" data-html2canvas-ignore="true">
         <button 
           onClick={descargarTiquete}
           className="flex items-center justify-center gap-2 bg-lingote-gold text-lingote-dark py-4 rounded-2xl font-black uppercase italic shadow-lg active:scale-95 transition-all"

@@ -160,23 +160,49 @@ export const AdminPanel: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const descargarLista = async () => {
     const element = document.getElementById('lista-compras-export');
     if (!element) return;
-    const canvas = await html2canvas(element, { backgroundColor: '#ffffff', scale: 2 });
-    const link = document.createElement('a');
-    link.download = `Lista_Compras_Lingote_${new Date().toLocaleDateString().replace(/\//g, '-')}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    mostrarToast('Lista descargada con éxito 📥');
+    
+    mostrarToast('Generando lista... 📄', 'info');
+    
+    try {
+      const canvas = await html2canvas(element, { 
+        backgroundColor: '#ffffff', 
+        scale: 2,
+        useCORS: true,
+        allowTaint: false
+      });
+      const link = document.createElement('a');
+      link.download = `Lista_Compras_Lingote_${new Date().toLocaleDateString().replace(/\//g, '-')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      mostrarToast('Lista descargada con éxito 📥');
+    } catch (error) {
+      console.error('Error al descargar lista:', error);
+      mostrarToast('Error al generar imagen ❌', 'error');
+    }
   };
 
   const descargarReporteDiario = async () => {
     const element = document.getElementById('reporte-diario-export');
     if (!element) return;
-    const canvas = await html2canvas(element, { backgroundColor: '#ffffff', scale: 2 });
-    const link = document.createElement('a');
-    link.download = `Cierre_Caja_Lingote_${new Date().toLocaleDateString().replace(/\//g, '-')}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    mostrarToast('Reporte descargado 📋');
+
+    mostrarToast('Generando reporte... 📊', 'info');
+
+    try {
+      const canvas = await html2canvas(element, { 
+        backgroundColor: '#ffffff', 
+        scale: 2,
+        useCORS: true,
+        allowTaint: false
+      });
+      const link = document.createElement('a');
+      link.download = `Cierre_Caja_Lingote_${new Date().toLocaleDateString().replace(/\//g, '-')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      mostrarToast('Reporte descargado 📋');
+    } catch (error) {
+      console.error('Error al descargar reporte:', error);
+      mostrarToast('Error al generar imagen ❌', 'error');
+    }
   };
 
   const tabs = [

@@ -17,13 +17,17 @@ import { useUserStore } from './store/useUserStore';
 import { useCartStore } from './store/useCartStore'; 
 import { useMenuStore } from './store/useMenuStore'; 
 import { mostrarToast } from './utils/alerts';
-import type { Categoria, ProductoMenu, Lingote, ItemCarrito, DatosPago, Usuario } from './types';
+import type { Categoria, ProductoMenu, Lingote, ItemCarrito, DatosPago } from './types';
 import type { Promocion } from './types/ProductoMenu';
 
 function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [categoria, setCategoria] = useState<Categoria>('lingotes');
   const usuario = useUserStore((state) => state.usuario);
+  const ultimoPedido = useUserStore((state) => state.ultimoPedido);
+  const setUltimoPedido = useUserStore((state) => state.setUltimoPedido);
+  const limpiarUltimoPedido = useUserStore((state) => state.limpiarUltimoPedido);
+  
   const { addItem, vaciarCarrito, itemsCount } = useCartStore();
   
   // Suscribirse al estado de agotados para forzar re-render cuando cambie la disponibilidad
@@ -34,24 +38,6 @@ function App() {
   const [mostrarMenu, setMostrarMenu] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [lingoteAConfigurar, setLingoteAConfigurar] = useState<Lingote | null>(null);
-
-  const [pedidoFinalizado, setPedidoFinalizado] = useState<{
-    id: string;
-    items: ItemCarrito[];
-    usuario: Usuario | null;
-    pago: DatosPago;
-    total: number;
-    fecha: string;
-  } | null>(null);
-
-  // Escuchar cambios de ruta para el panel de administración
-  useEffect(() => {
-    const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname);
-    };
-    window.addEventListener('popstate', handleLocationChange);
-    return () => window.removeEventListener('popstate', handleLocationChange);
-  }, []);
 
   const handleStart = () => {
     setMostrarMenu(true);
@@ -78,21 +64,22 @@ function App() {
   };
 
   const onFinalizarPedido = (id: string, pago: DatosPago, total: number, items: ItemCarrito[]) => {
-    setPedidoFinalizado({
+    const pedido = {
       id,
       items,
       usuario,
       pago,
       total,
       fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
+    };
+    setUltimoPedido(pedido);
     vaciarCarrito();
     setIsCartOpen(false);
   };
 
   const volverAlInicio = () => {
     setMostrarMenu(false);
-    setPedidoFinalizado(null);
+    limpiarUltimoPedido();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -143,17 +130,17 @@ function App() {
       />
       
       <AnimatePresence mode="wait">
-        {pedidoFinalizado ? (
+        {ultimoPedido ? (
           <motion.main
             key="ticket"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             className="flex-grow flex items-center justify-center p-4"
           >
             <TiqueteGourmet 
-              pedido={pedidoFinalizado as any} 
-              onNuevoPedido={() => setPedidoFinalizado(null)} 
+              pedido={ultimoPedido as any} 
+              onNuevoPedido={volverAlInicio} 
             />
           </motion.main>
         ) : (
