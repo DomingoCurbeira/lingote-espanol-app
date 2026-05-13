@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, User } from 'lucide-react';
 import { obtenerEstadoTienda } from '../config/horarios';
@@ -7,10 +8,51 @@ interface Props {
   onGoHome: () => void;
   onOpenProfile: () => void;
   cartCount: number;
+  onAdminAccess?: () => void;
 }
 
-export const Header = ({ onOpenCart, onGoHome, onOpenProfile, cartCount }: Props) => {
+export const Header = ({ onOpenCart, onGoHome, onOpenProfile, cartCount, onAdminAccess }: Props) => {
   const { estaAbierto, esCierreInminente } = obtenerEstadoTienda();
+  const [isPressing, setIsPressing] = useState(false);
+  const timerRef = useRef<number | null>(null);
+
+  const wasLongPress = useRef(false);
+
+  const startPress = () => {
+    if (!onAdminAccess) return;
+    setIsPressing(true);
+    wasLongPress.current = false;
+    timerRef.current = window.setTimeout(() => {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(200);
+      }
+      onAdminAccess();
+      setIsPressing(false);
+      wasLongPress.current = true;
+    }, 3000);
+  };
+
+  const endPress = (e: React.MouseEvent | React.TouchEvent) => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    setIsPressing(false);
+    if (wasLongPress.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (wasLongPress.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    onGoHome();
+  };
 
   return (
     <header className="sticky top-0 z-[100] w-full bg-white/90 backdrop-blur-md border-b border-gray-100">
@@ -26,10 +68,15 @@ export const Header = ({ onOpenCart, onGoHome, onOpenProfile, cartCount }: Props
           </div>
         </div>
 
-        {/* Centro: Logo/Home */}
+        {/* Centro: Logo/Home con Gesto Secreto */}
         <button 
-          onClick={onGoHome}
-          className="absolute left-1/2 -translate-x-1/2 hover:scale-110 transition-transform active:scale-90"
+          onClick={handleClick}
+          onMouseDown={startPress}
+          onMouseUp={endPress}
+          onMouseLeave={endPress}
+          onTouchStart={startPress}
+          onTouchEnd={endPress}
+          className={`absolute left-1/2 -translate-x-1/2 transition-all active:scale-90 ${isPressing ? 'scale-110 opacity-70' : 'hover:scale-110'}`}
         >
           <img src="/logo_lingote_transparente.svg" alt="Logo" className="w-10 h-10 object-contain" />
         </button>

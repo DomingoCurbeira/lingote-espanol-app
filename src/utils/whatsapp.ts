@@ -9,49 +9,41 @@ export const generarMensajeWhatsApp = (
 ) => {
   const fecha = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  let mensaje = `============================\n`;
-  mensaje += `    *ORDEN: #${pedidoID}*\n`;
-  mensaje += `============================\n`;
+  let mensaje = `🥘 *NUEVO PEDIDO: #${pedidoID}*\n`;
+  mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
   mensaje += `*EL LINGOTE ESPAÑOL*\n`;
-  mensaje += `============================\n\n`;
+  mensaje += `_Raíces Españolas, Corazón Tico_\n`;
+  mensaje += `━━━━━━━━━━━━━━━━━━━━\n\n`;
   
-  mensaje += `*CLIENTE:* ${usuario.nombre.toUpperCase()}\n`;
-  mensaje += `*PAGO:* ${pago.metodo === 'sinpe' ? `SINPE (Comp: ${pago.comprobante})` : 'EFECTIVO (Paga en caja)'}\n`;
-  mensaje += `*HORA:* ${fecha}\n\n`;
+  mensaje += `👤 *CLIENTE:* ${usuario.nombre.toUpperCase()}\n`;
+  mensaje += `💳 *PAGO:* ${pago.metodo === 'sinpe' ? `📲 SINPE (Comp: ${pago.comprobante})` : '💵 EFECTIVO (En Caja)'}\n`;
+  mensaje += `⏰ *HORA:* ${fecha}\n\n`;
 
-  mensaje += `*DETALLE DEL PEDIDO:*\n`;
-  mensaje += `----------------------------\n`;
+  mensaje += `🛒 *DETALLE DEL PEDIDO:*\n`;
+  mensaje += `────────────────────\n`;
 
   carrito.forEach((item) => {
-    mensaje += `> *${item.cantidad}x ${item.producto.nombre.toUpperCase()}*\n`;
+    mensaje += `*${item.cantidad}x ${item.producto.nombre.toUpperCase()}*\n`;
     
     if (item.extras.length > 0) {
-      item.extras.forEach(extra => {
-        mensaje += `   + ${extra.nombre}\n`;
-      });
+      mensaje += `   _Extras:_ ${item.extras.map(e => e.nombre).join(', ')}\n`;
     }
     
-    mensaje += `  _₡${(item.precioTotal * item.cantidad).toLocaleString()}_\n\n`;
+    mensaje += `   → ₡${(item.precioTotal * item.cantidad).toLocaleString()}\n\n`;
   });
 
-  mensaje += `----------------------------\n`;
-  mensaje += `*TOTAL A PAGAR: ₡${total.toLocaleString()}*\n`;
-  mensaje += `----------------------------\n\n`;
+  mensaje += `────────────────────\n`;
+  mensaje += `💰 *TOTAL A PAGAR: ₡${total.toLocaleString()}*\n`;
+  mensaje += `────────────────────\n\n`;
   
-  // Ajuste aquí: Añadimos espacio antes de la nota de cierre
-  mensaje += `*¡Gracias Por Preferirnos!*\n`;
-  mensaje += `============================\n`;
-  mensaje += `      *FIN DE LA ORDEN*\n`;
-  mensaje += `============================\n\n`; // Doble salto para separar la nota
+  mensaje += `¡Muchas gracias por su pedido! 🙏🥘\n`;
+  mensaje += `*¡Olé y Pura Vida!*\n\n`;
   
-  // Nota de horario destacada con un emoji para que no se pierda
-  mensaje += `⚠️ *NOTA IMPORTANTE:*\n`;
-  mensaje += `Recuerde que nuestro local cierra a las 4:00 PM. Por favor, pase por su pedido antes de esa hora. ¡Gracias!`;
+  mensaje += `⚠️ *NOTA:* Recuerde retirar su pedido antes de las 4:00 PM.`;
 
   const mensajeEncoded = encodeURIComponent(mensaje);
   
-  // Su número de WhatsApp (España por el prefijo 34, o cámbielo a 506 si es de CR)
-  const miTelefono = "34639835391"; 
+  const miTelefono = "50660437179"; // Prefijo Costa Rica + Número del Chef
   
   return `https://wa.me/${miTelefono}?text=${mensajeEncoded}`;
 };

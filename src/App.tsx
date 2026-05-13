@@ -115,6 +115,12 @@ function App() {
     });
   };
 
+  const handleAdminAccess = () => {
+    window.history.pushState({}, '', '/admin-negocio');
+    setCurrentPath('/admin-negocio');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   if (currentPath === '/admin-negocio') {
     return (
       <AdminLock>
@@ -133,6 +139,7 @@ function App() {
         onGoHome={volverAlInicio} 
         onOpenProfile={() => setModalPerfilAbierto(true)}
         cartCount={itemsCount()}
+        onAdminAccess={handleAdminAccess}
       />
       
       <AnimatePresence mode="wait">

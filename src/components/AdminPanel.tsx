@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { 
   TrendingUp, Package, ShoppingCart, ArrowLeft,
   Calculator, Download, Plus, Trash2, Banknote,
-  Smartphone, LayoutDashboard, Boxes
+  Smartphone, LayoutDashboard, Boxes, LogOut, Key,
+  CheckCircle2, ShieldCheck, Upload
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import insumosData from '../data/admin/insumos.json';
@@ -16,9 +17,56 @@ import { useMenuStore } from '../store/useMenuStore';
 import { mostrarToast, MySwal } from '../utils/alerts';
 
 export const AdminPanel: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const [activeTab, setActiveTab] = useState<'caja' | 'stock' | 'rentabilidad' | 'precios' | 'produccion'>('caja');
-  const { registrarVenta, ventasDelDia, limpiarCaja } = useAdminStore();
+  const [activeTab, setActiveTab] = useState<'caja' | 'stock' | 'rentabilidad' | 'precios' | 'produccion' | 'config'>('caja');
+  const { registrarVenta, ventasDelDia, limpiarCaja, setAuthenticated, actualizarPin, confirmarPago } = useAdminStore();
   const { toggleDisponibilidad, estaDisponible } = useMenuStore();
+
+  const [nuevoPin, setNuevoPin] = useState('');
+  
+  const handleLogout = () => {
+    setAuthenticated(false);
+    onBack();
+    mostrarToast('Sesión cerrada 🔒');
+  };
+
+  const exportData = () => {
+    const data = localStorage.getItem('lingote-admin-storage');
+    if (!data) return;
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `backup_lingote_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    mostrarToast('Copia de seguridad descargada 📥');
+  };
+
+  const importData = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        localStorage.setItem('lingote-admin-storage', content);
+        mostrarToast('Datos importados. Reiniciando... 🔄');
+        setTimeout(() => window.location.reload(), 2000);
+      } catch (err) {
+        mostrarToast('Error al importar archivo ❌');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleChangePin = () => {
+    if (nuevoPin.length !== 6 || isNaN(Number(nuevoPin))) {
+      mostrarToast('El PIN debe ser de 6 números ❌');
+      return;
+    }
+    actualizarPin(nuevoPin);
+    setNuevoPin('');
+    mostrarToast('PIN actualizado con éxito ✅');
+  };
   
   const allInsumos: Insumo[] = useMemo(() => [
     ...insumosData.vegetales, ...insumosData.proteinas, ...insumosData.lacteos,
@@ -39,6 +87,8 @@ export const AdminPanel: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const allProducts = useMemo(() => [...MENU_PROMOCIONES, ...MENU_LINGOTES, ...MENU_BEBIDAS, ...MENU_POSTRES, ...MENU_SALSAS], []);
   const totalTicket = ticketActual.reduce((sum, item) => sum + (item.producto.precio * item.cantidad), 0);
   const totalVentasHoy = ventasDelDia.reduce((sum, v) => sum + v.total, 0);
+  const totalConfirmado = ventasDelDia.filter(v => v.confirmada).reduce((sum, v) => sum + v.total, 0);
+  const pendientesSinpe = ventasDelDia.filter(v => v.metodoPago === 'sinpe' && !v.confirmada).length;
 
   const analysis = useMemo(() => {
     const lookup: any = { lingotes: MENU_LINGOTES, bebidas: MENU_BEBIDAS, postres: MENU_POSTRES, salsas: MENU_SALSAS, promociones: MENU_PROMOCIONES };
@@ -135,6 +185,7 @@ export const AdminPanel: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     { id: 'rentabilidad', label: 'Ganancia', icon: LayoutDashboard },
     { id: 'precios', label: 'Costos', icon: TrendingUp },
     { id: 'produccion', label: 'Cocina', icon: Calculator },
+    { id: 'config', label: 'Ajustes', icon: Key },
   ];
 
   return (
@@ -146,19 +197,28 @@ export const AdminPanel: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <h1 className="text-sm font-black uppercase italic text-lingote-dark tracking-tighter leading-none">Cerebro Real 🧠</h1>
           </div>
           
-          <div className="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-xl border border-green-100">
-             <div className="text-right">
-                <p className="text-[7px] font-black text-green-600 uppercase opacity-70 leading-none">Ventas Hoy</p>
-                <p className="text-xs font-black text-green-700 italic">₡{totalVentasHoy.toLocaleString()}</p>
-             </div>
-             <TrendingUp size={14} className="text-green-500" />
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-xl border border-green-100">
+               <div className="text-right">
+                  <p className="text-[7px] font-black text-green-600 uppercase opacity-70 leading-none">Ventas Hoy</p>
+                  <p className="text-xs font-black text-green-700 italic">₡{totalVentasHoy.toLocaleString()}</p>
+               </div>
+               <TrendingUp size={14} className="text-green-500" />
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors"
+              title="Cerrar Sesión"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         </div>
       </header>
 
       <div className="flex-grow flex flex-col lg:flex-row overflow-hidden text-left">
         <aside className="w-full lg:w-20 bg-white border-b lg:border-r border-gray-200 z-40 shrink-0 text-left">
-          <nav className="p-2 grid grid-cols-5 lg:grid-cols-1 gap-1 h-full">
+          <nav className="p-2 grid grid-cols-6 lg:grid-cols-1 gap-1 h-full">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isSelected = activeTab === tab.id;
@@ -180,6 +240,65 @@ export const AdminPanel: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         <main className="flex-grow overflow-y-auto no-scrollbar p-4 lg:p-6 bg-gray-50 text-left">
           <div className="max-w-6xl mx-auto">
+            {activeTab === 'config' && (
+              <div className="max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100 text-center">
+                  <div className="w-16 h-16 bg-lingote-gold/10 rounded-3xl flex items-center justify-center mx-auto mb-6 text-lingote-gold">
+                    <Key size={32} />
+                  </div>
+                  <h3 className="text-xl font-black uppercase italic text-lingote-dark mb-2">Seguridad del Panel</h3>
+                  <p className="text-xs font-medium text-gray-500 mb-8">Cambiá tu PIN de acceso de 6 dígitos para mantener el control total.</p>
+                  
+                  <div className="space-y-4">
+                    <div className="text-left">
+                      <label className="text-[10px] font-black uppercase text-gray-400 ml-4 mb-1 block">Nuevo PIN de 6 dígitos</label>
+                      <input 
+                        type="password" 
+                        maxLength={6}
+                        placeholder="••••••"
+                        value={nuevoPin}
+                        onChange={(e) => setNuevoPin(e.target.value.replace(/\D/g, ''))}
+                        className="w-full bg-gray-50 border-2 border-gray-100 p-4 rounded-2xl text-center text-2xl font-black tracking-[1em] outline-none focus:border-lingote-blue transition-all"
+                      />
+                    </div>
+                    <button 
+                      onClick={handleChangePin}
+                      className="w-full bg-lingote-dark text-white font-black uppercase italic py-4 rounded-2xl shadow-lg active:scale-95 transition-all hover:bg-lingote-blue"
+                    >
+                      Actualizar PIN 🔒
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-[2rem] shadow-md border border-gray-100">
+                  <h4 className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest text-center italic">Copia de Seguridad</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button 
+                      onClick={exportData}
+                      className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white transition-all active:scale-95"
+                    >
+                      <Download size={20} className="text-lingote-blue" />
+                      <span className="text-[8px] font-black uppercase text-gray-500">Exportar</span>
+                    </button>
+                    <label className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white transition-all active:scale-95 cursor-pointer">
+                      <Upload size={20} className="text-lingote-gold" />
+                      <span className="text-[8px] font-black uppercase text-gray-500">Importar</span>
+                      <input type="file" accept=".json" onChange={importData} className="hidden" />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="bg-red-50 p-6 rounded-[2rem] border border-red-100">
+                  <p className="text-[10px] font-black text-red-400 uppercase tracking-widest text-center mb-4 italic">Zona de Peligro</p>
+                  <button 
+                    onClick={handleResetCaja}
+                    className="w-full bg-white border border-red-200 text-red-500 font-black uppercase italic py-3 rounded-xl shadow-sm active:scale-95 transition-all hover:bg-red-500 hover:text-white"
+                  >
+                    Borrar Todas las Ventas de Hoy
+                  </button>
+                </div>
+              </div>
+            )}
             {activeTab === 'caja' && (
               <div className="flex flex-col lg:flex-row gap-6 items-start h-full text-left">
                 <div className="w-full lg:flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 text-left">
@@ -216,7 +335,7 @@ export const AdminPanel: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     </div>
                     <div className="p-4 bg-gray-50 border-t border-gray-100 space-y-3 text-left">
                       <input 
-                        type="text"
+                        type="text" 
                         placeholder="Nombre del Cliente (Opcional)"
                         value={nombreCliente}
                         onChange={(e) => setNombreCliente(e.target.value)}
@@ -233,16 +352,68 @@ export const AdminPanel: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   <div className="mt-6 bg-white p-6 rounded-[2rem] shadow-xl border border-gray-100 text-left">
                     <div className="flex justify-between items-center mb-4">
                         <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2"><TrendingUp size={14} /> Resumen de Hoy</h4>
-                        {ventasDelDia.length > 0 && (
-                            <button onClick={descargarReporteDiario} className="p-1.5 bg-lingote-blue text-white rounded-lg shadow-md active:scale-95 transition-all">
-                                <Download size={14} />
-                            </button>
-                        )}
+                        <div className="flex gap-2">
+                          {pendientesSinpe > 0 && (
+                            <div className="flex items-center gap-1 bg-orange-100 text-orange-600 px-2 py-1 rounded-lg animate-pulse">
+                              <ShieldCheck size={12} />
+                              <span className="text-[8px] font-black uppercase">{pendientesSinpe} x SINPE</span>
+                            </div>
+                          )}
+                          {ventasDelDia.length > 0 && (
+                              <button onClick={descargarReporteDiario} className="p-1.5 bg-lingote-blue text-white rounded-lg shadow-md active:scale-95 transition-all">
+                                  <Download size={14} />
+                              </button>
+                          )}
+                        </div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 text-center">
-                        <div className="bg-green-50 p-4 rounded-2xl"><p className="text-[8px] font-black uppercase text-green-700 opacity-70">Ventas</p><p className="text-xl font-black text-green-700 italic tabular-nums">₡{totalVentasHoy.toLocaleString()}</p></div>
-                        <div className="bg-gray-50 p-4 rounded-2xl"><p className="text-[8px] font-black uppercase text-gray-400 opacity-70">Pedidos</p><p className="text-xl font-black text-gray-700 italic tabular-nums">{ventasDelDia.length}</p></div>
+                        <div className="bg-green-50 p-4 rounded-2xl">
+                          <p className="text-[8px] font-black uppercase text-green-700 opacity-70">Confirmado</p>
+                          <p className="text-xl font-black text-green-700 italic tabular-nums">₡{totalConfirmado.toLocaleString()}</p>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-2xl">
+                          <p className="text-[8px] font-black uppercase text-gray-400 opacity-70">En Proceso</p>
+                          <p className="text-xl font-black text-gray-700 italic tabular-nums">₡{(totalVentasHoy - totalConfirmado).toLocaleString()}</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 space-y-4 max-h-[40vh] overflow-y-auto no-scrollbar pr-1">
+                      <h5 className="text-[9px] font-black uppercase text-gray-300 italic tracking-[0.2em] border-b pb-1">Últimas Ventas</h5>
+                      {ventasDelDia.slice().reverse().map((v) => (
+                        <div key={v.id} className={`p-3 rounded-2xl border transition-all ${v.confirmada ? 'bg-white border-gray-100' : 'bg-orange-50/50 border-orange-100 shadow-sm'}`}>
+                          <div className="flex justify-between items-start">
+                            <div className="text-left">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[8px] font-black bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded">#{v.id}</span>
+                                <p className="text-[10px] font-black uppercase italic text-lingote-dark">{v.cliente}</p>
+                              </div>
+                              <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">
+                                {v.metodoPago === 'sinpe' ? '📱 SINPE' : '💵 Efectivo'} • {new Date(v.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-black text-lingote-dark italic leading-none">₡{v.total.toLocaleString()}</p>
+                              {!v.confirmada && v.metodoPago === 'sinpe' ? (
+                                <button 
+                                  onClick={() => {
+                                    confirmarPago(v.id);
+                                    mostrarToast('Pago verificado ✅');
+                                  }}
+                                  className="mt-2 flex items-center gap-1 bg-lingote-blue text-white px-2 py-1 rounded-lg text-[8px] font-black uppercase italic animate-bounce shadow-lg"
+                                >
+                                  <CheckCircle2 size={10} /> Verificar Pago
+                                </button>
+                              ) : (
+                                <div className="mt-2 flex items-center gap-1 text-green-500 justify-end">
+                                  <ShieldCheck size={12} />
+                                  <span className="text-[8px] font-black uppercase">Verificado</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
                     <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
@@ -400,7 +571,7 @@ export const AdminPanel: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
                     <div id="lista-compras-export" style={{ backgroundColor: '#ffffff', color: '#1e293b' }} className="space-y-2 p-10 bg-white rounded-xl text-left w-[500px]">
                       <div style={{ borderBottomColor: '#f1f5f9', borderBottomWidth: '2px', borderBottomStyle: 'dashed' }} className="pb-3 mb-4 text-left">
-                        <p style={{ color: '#2b3674' }} className="text-[10px] font-black uppercase tracking-[0.3em]">El Lingote Español</p>
+                        <p style={{ color: '#2b3674' }} className="text-[10px] font-black uppercase tracking-[0.4em]">El Lingote Español</p>
                         <h4 style={{ color: '#1e293b' }} className="text-xl font-black uppercase italic leading-none mt-2">Orden de Compra</h4>
                         <p style={{ color: '#94a3b8' }} className="text-[8px] font-bold mt-1 uppercase italic">{new Date().toLocaleDateString()}</p>
                       </div>
