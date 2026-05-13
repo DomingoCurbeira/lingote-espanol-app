@@ -1,0 +1,153 @@
+[
+  {
+    "id": "rec-lingote-clasico",
+    "nombre": "Lingote Clásico",
+    "categoria_tienda": "lingotes",
+    "id_producto_tienda": 1,
+    "ingredientes": [
+      { "insumo_id": "ins-papa", "cantidad": 0.235 },
+      { "insumo_id": "ins-huevo", "cantidad": 1.2 },
+      { "insumo_id": "ins-cebolla", "cantidad": 0.033 },
+      { "insumo_id": "ins-aceite", "cantidad": 0.02 },
+      { "insumo_id": "ins-gas", "cantidad": 1 }
+    ],
+    "packaging": [
+      { "insumo_id": "ins-caja-kraft", "cantidad": 1 },
+      { "insumo_id": "ins-tenedor", "cantidad": 1 },
+      { "insumo_id": "ins-bolsa-kraft", "cantidad": 1 }
+    ],
+    "merma_porcentaje": 5
+  },
+  {
+    "id": "rec-lingote-tico",
+    "nombre": "Lingote Tico",
+    "categoria_tienda": "lingotes",
+    "id_producto_tienda": 2,
+    "ingredientes": [
+      { "insumo_id": "ins-papa", "cantidad": 0.235 },
+      { "insumo_id": "ins-huevo", "cantidad": 1.2 },
+      { "insumo_id": "ins-pinto", "cantidad": 0.150 },
+      { "insumo_id": "ins-natilla", "cantidad": 0.040 },
+      { "insumo_id": "ins-aceite", "cantidad": 0.02 },
+      { "insumo_id": "ins-gas", "cantidad": 1 }
+    ],
+    "packaging": [
+      { "insumo_id": "ins-caja-kraft", "cantidad": 1 },
+      { "insumo_id": "ins-tenedor", "cantidad": 1 }
+    ],
+    "merma_porcentaje": 5
+  },
+  {
+    "id": "rec-lingote-patron",
+    "nombre": "Lingote Patrón",
+    "categoria_tienda": "lingotes",
+    "id_producto_tienda": 3,
+    "ingredientes": [
+      { "insumo_id": "ins-papa", "cantidad": 0.235 },
+      { "insumo_id": "ins-huevo", "cantidad": 1.2 },
+      { "insumo_id": "ins-cerdo", "cantidad": 0.100 },
+      { "insumo_id": "ins-aguacate", "cantidad": 0.030 },
+      { "insumo_id": "ins-cebolla", "cantidad": 0.020 },
+      { "insumo_id": "ins-aceite", "cantidad": 0.02 },
+      { "insumo_id": "ins-gas", "cantidad": 1 }
+    ],
+    "packaging": [
+      { "insumo_id": "ins-caja-kraft", "cantidad": 1 },
+      { "insumo_id": "ins-tenedor", "cantidad": 1 }
+    ],
+    "merma_porcentaje": 5
+  },
+  {
+    "id": "rec-lingote-supremo",
+    "nombre": "Lingote Supremo",
+    "categoria_tienda": "lingotes",
+    "id_producto_tienda": 5,
+    "ingredientes": [
+      { "insumo_id": "ins-papa", "cantidad": 0.235 },
+      { "insumo_id": "ins-huevo", "cantidad": 1.2 },
+      { "insumo_id": "ins-pinto", "cantidad": 0.150 },
+      { "insumo_id": "ins-natilla", "cantidad": 0.040 },
+      { "insumo_id": "ins-cerdo", "cantidad": 0.100 },
+      { "insumo_id": "ins-aguacate", "cantidad": 0.030 },
+      { "insumo_id": "ins-cebolla", "cantidad": 0.020 },
+      { "insumo_id": "ins-aceite", "cantidad": 0.02 },
+      { "insumo_id": "ins-gas", "cantidad": 1 }
+    ],
+    "packaging": [
+      { "insumo_id": "ins-caja-kraft", "cantidad": 1 },
+      { "insumo_id": "ins-tenedor", "cantidad": 1 }
+    ],
+    "merma_porcentaje": 5
+  },
+  {
+    "id": "rec-bocata-real",
+    "nombre": "Bocata Real",
+    "categoria_tienda": "lingotes",
+    "id_producto_tienda": 6,
+    "ingredientes": [
+      { "insumo_id": "ins-pan-el-molino", "cantidad": 0.5 },
+      { "insumo_id": "ins-papa", "cantidad": 0.235 },
+      { "insumo_id": "ins-huevo", "cantidad": 1.2 },
+      { "insumo_id": "ins-tomate", "cantidad": 0.050 },
+      { "insumo_id": "ins-aceite", "cantidad": 0.020 }
+    ],
+    "packaging": [
+      { "insumo_id": "ins-bolsa-kraft", "cantidad": 1 }
+    ],
+    "merma_porcentaje": 3
+  },
+  {
+    "id": "rec-promo-express",
+    "nombre": "Promo Bocata ⚡",
+    "categoria_tienda": "promociones",
+    "id_producto_tienda": "promo-express",
+    "ingredientes": [
+      { "insumo_id": "ins-pan-el-molino", "cantidad": 0.5 },
+      { "insumo_id": "ins-papa", "cantidad": 0.235 },
+      { "insumo_id": "ins-huevo", "cantidad": 1.2 },
+      { "insumo_id": "ins-cas", "cantidad": 0.120 }
+    ],
+    "packaging": [
+      { "insumo_id": "ins-bolsa-kraft", "cantidad": 1 },
+      { "insumo_id": "ins-vaso-pet", "cantidad": 1 }
+    ],
+    "merma_porcentaje": 5
+  },
+  {
+    "id": "rec-promo-golosa",
+    "nombre": "La Trilogía",
+    "categoria_tienda": "promociones",
+    "id_producto_tienda": "PROMO-GOLOSA",
+    "ingredientes": [
+      { "insumo_id": "ins-papa", "cantidad": 0.235 },
+      { "insumo_id": "ins-huevo", "cantidad": 1.2 },
+      { "insumo_id": "ins-cas", "cantidad": 0.120 },
+      { "insumo_id": "ins-dona", "cantidad": 1 },
+      { "insumo_id": "ins-helado", "cantidad": 0.03 }
+    ],
+    "packaging": [
+      { "insumo_id": "ins-caja-kraft", "cantidad": 1 },
+      { "insumo_id": "ins-vaso-pet", "cantidad": 1 },
+      { "insumo_id": "ins-caja-plastico", "cantidad": 1 }
+    ],
+    "merma_porcentaje": 5
+  },
+  {
+    "id": "rec-promo-real",
+    "nombre": "Promo Real + Regalia",
+    "categoria_tienda": "promociones",
+    "id_producto_tienda": "PROMO-REAL",
+    "ingredientes": [
+      { "insumo_id": "ins-papa", "cantidad": 0.705 },
+      { "insumo_id": "ins-huevo", "cantidad": 3.6 },
+      { "insumo_id": "ins-pinto", "cantidad": 0.300 },
+      { "insumo_id": "ins-cerdo", "cantidad": 0.200 },
+      { "insumo_id": "ins-cas", "cantidad": 0.240 }
+    ],
+    "packaging": [
+      { "insumo_id": "ins-caja-kraft", "cantidad": 3 },
+      { "insumo_id": "ins-vaso-pet", "cantidad": 2 }
+    ],
+    "merma_porcentaje": 5
+  }
+]

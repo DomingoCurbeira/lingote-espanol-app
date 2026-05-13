@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Phone, History, RefreshCcw, Calendar, LogOut, ShoppingBag } from 'lucide-react';
+import { X, User, Phone, History, RefreshCcw, Calendar, LogOut, ShoppingBag, Award } from 'lucide-react';
 import { useUserStore } from '../store/useUserStore';
 import { useCartStore } from '../store/useCartStore';
+import { StampCard } from './StampCard';
 import type { PedidoHistorial } from '../types';
 
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
 }
 
 export const ModalPerfil = ({ isOpen, onClose, onRepeatOrder }: Props) => {
-  const { usuario, historialPedidos, borrarUsuario, limpiarHistorial } = useUserStore();
+  const { usuario, historialPedidos, sellos, borrarUsuario, limpiarHistorial } = useUserStore();
   const { addItem, vaciarCarrito } = useCartStore();
 
   const handleRepetirPedido = (pedido: PedidoHistorial) => {
@@ -67,7 +68,16 @@ export const ModalPerfil = ({ isOpen, onClose, onRepeatOrder }: Props) => {
               </div>
             </div>
 
-            <div className="flex-grow overflow-y-auto p-8 space-y-8 no-scrollbar">
+            <div className="flex-grow overflow-y-auto p-8 space-y-10 no-scrollbar pb-20">
+              {/* SECCIÓN DE FIDELIDAD */}
+              <section>
+                <div className="flex items-center gap-2 text-lingote-gold mb-6">
+                  <Award size={20} />
+                  <h3 className="text-sm font-black uppercase tracking-widest italic">Mi Fidelidad</h3>
+                </div>
+                <StampCard sellos={sellos} />
+              </section>
+
               <section>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2 text-lingote-blue">

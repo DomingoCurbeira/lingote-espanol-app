@@ -10,17 +10,25 @@ import { PersonalizacionModal } from './components/PersonalizacionModal';
 import { CartDrawer } from './components/CartDrawer';
 import { TiqueteGourmet } from './components/TiqueteGourmet';
 import { UbicacionSeccion } from './components/UbicacionSeccion';
+import { AdminPanel } from './components/AdminPanel';
+import { AdminLock } from './components/AdminLock';
 import { MENU_LINGOTES, MENU_BEBIDAS, MENU_POSTRES, MENU_PROMOCIONES, MENU_SALSAS } from './data'; 
 import { useUserStore } from './store/useUserStore';
 import { useCartStore } from './store/useCartStore'; 
-import type { Categoria, ProductoMenu, Lingote, ItemCarrito, DatosPago } from './types';
+import { useMenuStore } from './store/useMenuStore'; 
+import { mostrarToast } from './utils/alerts';
+import type { Categoria, ProductoMenu, Lingote, ItemCarrito, DatosPago, Usuario } from './types';
 import type { Promocion } from './types/ProductoMenu';
 
 function App() {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [categoria, setCategoria] = useState<Categoria>('lingotes');
   const usuario = useUserStore((state) => state.usuario);
   const { addItem, vaciarCarrito, itemsCount } = useCartStore();
   
+  // Suscribirse al estado de agotados para forzar re-render cuando cambie la disponibilidad
+  const estaDisponible = useMenuStore((state) => state.estaDisponible);
+
   const [modalUsuarioAbierto, setModalUsuarioAbierto] = useState(false);
   const [modalPerfilAbierto, setModalPerfilAbierto] = useState(false);
   const [mostrarMenu, setMostrarMenu] = useState(false);
@@ -30,11 +38,20 @@ function App() {
   const [pedidoFinalizado, setPedidoFinalizado] = useState<{
     id: string;
     items: ItemCarrito[];
-    usuario: any;
+    usuario: Usuario | null;
     pago: DatosPago;
     total: number;
     fecha: string;
   } | null>(null);
+
+  // Escuchar cambios de ruta para el panel de administración
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
 
   const handleStart = () => {
     setMostrarMenu(true);
@@ -49,11 +66,13 @@ function App() {
       precioTotal: item.precio 
     };
     addItem(nuevoItem);
+    mostrarToast(`${item.nombre} añadido 🛒`);
     setIsCartOpen(true);
   };
 
   const confirmarPersonalizacion = (itemCarrito: ItemCarrito) => {
     addItem(itemCarrito);
+    mostrarToast(`${itemCarrito.producto.nombre} añadido 🛒`);
     setLingoteAConfigurar(null);
     setIsCartOpen(true);
   };
@@ -96,8 +115,19 @@ function App() {
     });
   };
 
+  if (currentPath === '/admin-negocio') {
+    return (
+      <AdminLock>
+        <AdminPanel onBack={() => {
+          window.history.pushState({}, '', '/');
+          setCurrentPath('/');
+        }} />
+      </AdminLock>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-lingote-bg">
+    <div className="min-h-screen bg-lingote-bg">
       <Header 
         onOpenCart={() => setIsCartOpen(true)} 
         onGoHome={volverAlInicio} 
@@ -115,7 +145,7 @@ function App() {
             className="flex-grow flex items-center justify-center p-4"
           >
             <TiqueteGourmet 
-              pedido={pedidoFinalizado} 
+              pedido={pedidoFinalizado as any} 
               onNuevoPedido={() => setPedidoFinalizado(null)} 
             />
           </motion.main>
@@ -126,7 +156,7 @@ function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, y: -20 }}
-              className="flex-grow flex items-center justify-center p-6 text-center"
+              className="flex-grow flex flex-col items-center justify-center p-6 text-center min-h-[80vh]"
             >
               <div className="max-w-md">
                 <div className="w-48 h-48 mx-auto mb-8 relative flex items-center justify-center">
@@ -142,7 +172,7 @@ function App() {
                   Raíces <span className="text-lingote-red">Españolas</span>,<br/>
                   Corazón <span className="text-lingote-blue">Tico</span>
                 </h1>
-                <p className="text-gray-500 font-medium italic mb-10">La mejor tortilla española de Cartago.</p>
+                <p className="text-gray-700 font-medium italic mb-10">La mejor tortilla española de Cartago.</p>
                 <button 
                   onClick={handleStart}
                   className="bg-lingote-blue text-white font-black text-2xl px-12 py-6 rounded-[2rem] shadow-2xl hover:bg-lingote-dark transition-all transform active:scale-95 italic uppercase"
@@ -159,12 +189,12 @@ function App() {
               exit={{ opacity: 0, x: -20 }}
               className="flex flex-col flex-grow"
             >
-              <main className="flex-grow max-w-5xl mx-auto w-full p-6">
-                <SelectorCategorias 
-                  activa={categoria} 
-                  onChange={setCategoria} 
-                />
+              <SelectorCategorias 
+                activa={categoria} 
+                onChange={setCategoria} 
+              />
 
+              <main className="flex-grow max-w-5xl mx-auto w-full px-6">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={categoria}
@@ -174,23 +204,43 @@ function App() {
                     className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 pb-20"
                   >
                     {categoria === 'lingotes' && MENU_LINGOTES.map(lingote => (
-                      <LingoteCard key={lingote.id} lingote={lingote} onSelect={setLingoteAConfigurar} />
+                      <LingoteCard 
+                        key={lingote.id} 
+                        lingote={{...lingote, disponible: lingote.disponible && estaDisponible('lingotes', lingote.id)}} 
+                        onSelect={setLingoteAConfigurar} 
+                      />
                     ))}
 
                     {categoria === 'promociones' && MENU_PROMOCIONES.map(item => (
-                      <ProductoCard key={item.id} item={item} onAdd={agregarAlCarrito} />
+                      <ProductoCard 
+                        key={item.id} 
+                        item={{...item, disponible: item.disponible && estaDisponible('promociones', item.id)}} 
+                        onAdd={agregarAlCarrito} 
+                      />
                     ))}
 
                     {categoria === 'bebidas' && MENU_BEBIDAS.map(item => (
-                      <ProductoCard key={item.id} item={item} onAdd={agregarAlCarrito} />
+                      <ProductoCard 
+                        key={item.id} 
+                        item={{...item, disponible: item.disponible && estaDisponible('bebidas', item.id)}} 
+                        onAdd={agregarAlCarrito} 
+                      />
                     ))}
 
                     {categoria === 'postres' && MENU_POSTRES.map(item => (
-                      <ProductoCard key={item.id} item={item} onAdd={agregarAlCarrito} />
+                      <ProductoCard 
+                        key={item.id} 
+                        item={{...item, disponible: item.disponible && estaDisponible('postres', item.id)}} 
+                        onAdd={agregarAlCarrito} 
+                      />
                     ))}
 
                     {categoria === 'salsas' && MENU_SALSAS.map(item => (
-                      <ProductoCard key={item.id} item={item} onAdd={agregarAlCarrito} />
+                      <ProductoCard 
+                        key={item.id} 
+                        item={{...item, disponible: item.disponible && estaDisponible('salsas', item.id)}} 
+                        onAdd={agregarAlCarrito} 
+                      />
                     ))}
                   </motion.div>
                 </AnimatePresence>

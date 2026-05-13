@@ -19,7 +19,7 @@ interface Props {
 
 export const CartDrawer = ({ isOpen, onClose, onFinalizado, onRequireUser }: Props) => {
   const { carrito, removeItem, updateCantidad, getTotal, addItem } = useCartStore();
-  const { usuario, agregarPedidoAlHistorial } = useUserStore();
+  const { usuario, agregarPedidoAlHistorial, agregarSellos } = useUserStore();
 
   const [metodoPago, setMetodoPago] = useState<MetodoPago | null>(null);
   const [comprobante, setComprobante] = useState('');
@@ -63,6 +63,17 @@ export const CartDrawer = ({ isOpen, onClose, onFinalizado, onRequireUser }: Pro
     const datosPago = { metodo: metodoPago, comprobante: comprobante || undefined };
     const url = generarMensajeWhatsApp(carrito, usuario, getTotal(), datosPago, pedidoID);
     
+    // Fidelización: 1 Lingote = 1 Sello
+    const lingotesComprados = carrito.reduce((total, item) => {
+      // IDs de lingotes y bocata
+      const idsLingotes = [1, 2, 3, 5, 6, 99];
+      return total + (idsLingotes.includes(item.producto.id) ? item.cantidad : 0);
+    }, 0);
+    
+    if (lingotesComprados > 0) {
+      agregarSellos(lingotesComprados);
+    }
+
     agregarPedidoAlHistorial({
       id: pedidoID,
       items: [...carrito],

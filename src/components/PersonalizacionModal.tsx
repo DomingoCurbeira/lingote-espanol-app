@@ -14,13 +14,9 @@ interface Props {
 type Paso = 'base' | 'proteina' | 'vegetal' | 'salsa' | 'cantidad';
 
 export const PersonalizacionModal = ({ lingote, isOpen, onClose, onConfirmar }: Props) => {
-  // Detectamos si es un lingote de receta fija (ID != 99)
   const isFijo = lingote.id !== 99;
-  
-  // Definimos los pasos dinámicamente
-  const pasos: Paso[] = isFijo 
-    ? ['vegetal', 'salsa', 'cantidad'] 
-    : ['base', 'proteina', 'vegetal', 'salsa', 'cantidad'];
+  // Ahora todos los lingotes son de receta fija, solo mostramos el paso de cantidad
+  const pasos: Paso[] = ['cantidad'];
 
   const [pasoActual, setPasoActual] = useState<Paso>(pasos[0]);
   const [base, setBase] = useState<Extra | null>(null);

@@ -10,25 +10,20 @@ interface Props {
 }
 
 export const Header = ({ onOpenCart, onGoHome, onOpenProfile, cartCount }: Props) => {
-  const { estaAbierto, esCierreInminente, horaLimitePedidos } = obtenerEstadoTienda();
+  const { estaAbierto, esCierreInminente } = obtenerEstadoTienda();
 
   return (
-    <header className="sticky top-0 z-[100] w-full bg-white/80 backdrop-blur-md border-b border-gray-100">
-      <div className="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
+    <header className="sticky top-0 z-[100] w-full bg-white/90 backdrop-blur-md border-b border-gray-100">
+      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
         
         {/* Lado Izquierdo: Estado de la Tienda */}
         <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full animate-pulse ${estaAbierto ? (esCierreInminente ? 'bg-yellow-500' : 'bg-green-500') : 'bg-red-500'}`} />
-            <span className={`text-[10px] font-black uppercase italic tracking-widest ${estaAbierto ? (esCierreInminente ? 'text-yellow-600' : 'text-green-600') : 'text-red-600'}`}>
-              {estaAbierto ? (esCierreInminente ? 'Última llamada' : 'Abierto') : 'Cerrado'}
+          <div className="flex items-center gap-1.5">
+            <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${estaAbierto ? (esCierreInminente ? 'bg-yellow-500' : 'bg-green-500') : 'bg-red-500'}`} />
+            <span className={`text-[9px] font-black uppercase italic tracking-wider ${estaAbierto ? (esCierreInminente ? 'text-yellow-600' : 'text-green-600') : 'text-red-600'}`}>
+              {estaAbierto ? (esCierreInminente ? 'Casi Cerrado' : 'Abierto') : 'Cerrado'}
             </span>
           </div>
-          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">
-            {estaAbierto 
-              ? `Pedidos hasta las ${horaLimitePedidos}` 
-              : 'Abrimos a las 8:00 AM'}
-          </p>
         </div>
 
         {/* Centro: Logo/Home */}
@@ -36,23 +31,23 @@ export const Header = ({ onOpenCart, onGoHome, onOpenProfile, cartCount }: Props
           onClick={onGoHome}
           className="absolute left-1/2 -translate-x-1/2 hover:scale-110 transition-transform active:scale-90"
         >
-          <img src="/logo_lingote_transparente.svg" alt="Logo" className="w-12 h-12 object-contain" />
+          <img src="/logo_lingote_transparente.svg" alt="Logo" className="w-10 h-10 object-contain" />
         </button>
 
         {/* Lado Derecho: Acciones */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button 
             onClick={onOpenProfile}
-            className="p-3 text-lingote-dark hover:bg-gray-100 rounded-2xl transition-all active:scale-90"
+            className="p-2 text-lingote-dark hover:bg-gray-100 rounded-xl transition-all active:scale-90"
           >
-            <User size={24} strokeWidth={2.5} />
+            <User size={20} strokeWidth={2.5} />
           </button>
           
           <button 
             onClick={onOpenCart}
-            className="relative p-3 bg-lingote-dark text-white rounded-2xl shadow-xl shadow-lingote-dark/20 hover:scale-105 active:scale-95 transition-all"
+            className="relative p-2 bg-lingote-dark text-white rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all"
           >
-            <ShoppingBag size={24} strokeWidth={2.5} />
+            <ShoppingBag size={20} strokeWidth={2.5} />
             <AnimatePresence>
               {cartCount > 0 && (
                 <motion.span 

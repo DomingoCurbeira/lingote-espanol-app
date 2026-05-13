@@ -3,16 +3,14 @@ import type { Lingote, Extra } from '../types';
 /**
  * EXTRAS PARA EL "ARMÁ TU LINGOTE"
  * Organizados por categorías para el flujo paso a paso
+ * (Mantenidos para uso futuro o extras independientes)
  */
 export const CATEGORIAS_PERSONALIZACION = {
   bases: [
-    // { id: 'b-pan', nombre: 'Pan Crujiente', precio: 0, disponible: true },
     { id: 'b-pinto', nombre: 'Gallo Pinto', precio: 500, disponible: true },
   ],
   proteinas: [
     { id: 'p-cerdo', nombre: 'Cerdo Mechado', precio: 1000, disponible: true },
-    // { id: 'p-chicharron', nombre: 'Chicharrón Español', precio: 1200, disponible: false },
-    // { id: 'p-huevo', nombre: 'Huevo Frito', precio: 500, disponible: true },
   ],
   vegetales: [
     { id: 'v-aguacate', nombre: 'Aguacate', precio: 600, disponible: true },
@@ -27,7 +25,6 @@ export const CATEGORIAS_PERSONALIZACION = {
   ]
 };
 
-// Mantenemos esto para compatibilidad si otros componentes lo usan
 export const EXTRAS_DISPONIBLES: Extra[] = [
   ...CATEGORIAS_PERSONALIZACION.bases,
   ...CATEGORIAS_PERSONALIZACION.proteinas,
@@ -56,7 +53,7 @@ export const MENU_LINGOTES: Lingote[] = [
     ingredientesBase: ["Tortilla de Patatas", "Gallo Pinto", "Natilla"],
     alergenos: ["🥚", "🥛"],
     disponible: true,
-    personalizable:  false
+    personalizable: false
   },
   {
     id: 3,
@@ -81,14 +78,14 @@ export const MENU_LINGOTES: Lingote[] = [
     personalizable: false 
   },
   {
-    id: 99,
-    nombre: "Diseña tu Lingote",
-    precio: 1500, // Precio base de la Tortilla sola
-    descripcion: "¡Tu eres el chef! Partimos de nuestra base de Tortilla de Patatas y tu elijes los toppings que más te gusten.",
-    imagen: "lingote_tortilla.webp", // Deberás añadir esta imagen o usar un placeholder
-    ingredientesBase: ["Tortilla de Patatas"],
-    alergenos: ["🥚"],
+    id: 6,
+    nombre: "Bocata Español",
+    precio: 2000,
+    descripcion: "Nuestra tortilla artesanal jugosa, servida en pan de baguette artesanal de El Molino con aliño tradicional. ¡Ideal para el camino!",
+    imagen: "bocata.webp",
+    ingredientesBase: ["Tortilla de Patatas", "Pan Artesano", "Tomate", "AOVE"],
+    alergenos: ["🥚", "🌽"],
     disponible: true,
-    personalizable: true // UNICA OPCIÓN PERSONALIZABLE
+    personalizable: false 
   }
 ];

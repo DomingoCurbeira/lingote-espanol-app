@@ -1,0 +1,36 @@
+{
+  "vegetales": [
+    { "id": "ins-papa", "nombre": "Papa (Limpia/Pelada)", "precio": 450, "unidad": "Kg", "categoria": "Feria" },
+    { "id": "ins-cebolla", "nombre": "Cebolla Morada", "precio": 700, "unidad": "Kg", "categoria": "Feria" },
+    { "id": "ins-aguacate", "nombre": "Aguacate Hass", "precio": 3500, "unidad": "Kg", "categoria": "Feria" },
+    { "id": "ins-limon", "nombre": "Limón Mesino", "precio": 1500, "unidad": "Kg", "categoria": "Feria" }
+  ],
+  "proteinas": [
+    { "id": "ins-huevo", "nombre": "Huevo Clase L", "precio": 80, "unidad": "Unid", "categoria": "Distribuidora" },
+    { "id": "ins-cerdo", "nombre": "Posta de Cerdo", "precio": 4500, "unidad": "Kg", "categoria": "Carnicería" }
+  ],
+  "lacteos": [
+    { "id": "ins-leche", "nombre": "Leche Semidescremada", "precio": 750, "unidad": "L", "categoria": "Suli/PriceSmart" },
+    { "id": "ins-natilla", "nombre": "Natilla Premium", "precio": 3500, "unidad": "Kg", "categoria": "Suli/PriceSmart" },
+    { "id": "ins-queso-crema", "nombre": "Queso Crema", "precio": 3200, "unidad": "Kg", "categoria": "Suli/PriceSmart" },
+    { "id": "ins-crema-dulce", "nombre": "Crema Dulce (35%)", "precio": 2100, "unidad": "L", "categoria": "Suli/PriceSmart" }
+  ],
+  "panaderia_y_dulce": [
+    { "id": "ins-pan-el-molino", "nombre": "Baguette El Molino", "precio": 400, "unidad": "Unid", "categoria": "Local" },
+    { "id": "ins-dona", "nombre": "Dona Glaseada", "precio": 250, "unidad": "Unid", "categoria": "PriceSmart" },
+    { "id": "ins-helado", "nombre": "Helado Vainilla", "precio": 8000, "unidad": "Galón (4L)", "categoria": "PriceSmart" },
+    { "id": "ins-galleta-maria", "nombre": "Galleta María", "precio": 700, "unidad": "Paquete", "categoria": "Suli" },
+    { "id": "ins-azucar", "nombre": "Azúcar Blanca", "precio": 700, "unidad": "Kg", "categoria": "Supermercado" }
+  ],
+  "packaging": [
+    { "id": "ins-caja-kraft", "nombre": "Caja Lunch Box M", "precio": 30, "unidad": "Unid", "categoria": "Empaques" },
+    { "id": "ins-vaso-pet", "nombre": "Vaso PET 10/12/16 oz", "precio": 80, "unidad": "Unid", "categoria": "Empaques" },
+    { "id": "ins-tapa-domo", "nombre": "Tapa Domo", "precio": 70, "unidad": "Unid", "categoria": "Empaques" },
+    { "id": "ins-bolsa-kraft", "nombre": "Bolsa Kraft Express", "precio": 20, "unidad": "Unid", "categoria": "Empaques" },
+    { "id": "ins-tenedor", "nombre": "Tenedor Madera", "precio": 25, "unidad": "Unid", "categoria": "Empaques" }
+  ],
+  "otros": [
+    { "id": "ins-aceite", "nombre": "Aceite Girasol", "precio": 1080, "unidad": "L", "categoria": "Supermercado" },
+    { "id": "ins-gas", "nombre": "Gas/Energía (Lote)", "precio": 286, "unidad": "Porción", "categoria": "Costos Fijos" }
+  ]
+}
