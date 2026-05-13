@@ -11,7 +11,7 @@ export const MENU_SALSAS: ProductoMenu[] = [
   },
   { 
     id: 51, 
-    nombre: "Salsa Caribeña", 
+    nombre: "Caribeña", 
     precio: 500, 
     desc: "Toque dulce y picante suave con aroma a limón (40ml).", 
     imagen: "salsa-caribena.webp", 
@@ -19,7 +19,7 @@ export const MENU_SALSAS: ProductoMenu[] = [
   },
   { 
     id: 52, 
-    nombre: "Salsa Chipotle", 
+    nombre: "Chipotle", 
     precio: 500, 
     desc: "Ahumada, cremosa y con picante medio (40ml).", 
     imagen: "salsa-chipotle.webp", 
@@ -35,7 +35,7 @@ export const MENU_SALSAS: ProductoMenu[] = [
   },
   { 
     id: 54, 
-    nombre: "Natilla Premium", 
+    nombre: "Natilla", 
     precio: 500, 
     desc: "Cremosa y fresca, ideal para los amantes del pinto (40ml).", 
     imagen: "salsa-natilla.webp", 
